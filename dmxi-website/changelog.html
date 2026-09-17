@@ -1,0 +1,391 @@
+<title>DMXI Changelog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root {
+  --ink:         #141923;
+  --ink-mid:     #3A4459;
+  --muted:       #5F6B84;
+  --rule:        #DFE4EC;
+  --ground:      #F2F5F9;
+  --surface:     #FFFFFF;
+  --accent:      #0ABFAD;
+  --accent-dark: #088B7D;
+  --shadow-sm:   0 1px 4px rgba(20,25,35,0.07);
+  --shadow-md:   0 4px 20px rgba(20,25,35,0.10);
+  --tag-new:       #0A7C6E;
+  --tag-new-bg:    #DCFDF8;
+  --tag-fix:       #B45309;
+  --tag-fix-bg:    #FEF3C7;
+  --tag-improved:  #1D4ED8;
+  --tag-improved-bg: #DBEAFE;
+  --tag-removed:   #B91C1C;
+  --tag-removed-bg:#FEE2E2;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  color: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink:         #E2E7F0;
+    --ink-mid:     #A8B4CC;
+    --muted:       #7B8BA8;
+    --rule:        #222C3E;
+    --ground:      #0D1220;
+    --surface:     #151E2E;
+    --accent:      #0DCFC0;
+    --accent-dark: #0ABFAD;
+    --shadow-sm:   0 1px 4px rgba(0,0,0,0.25);
+    --shadow-md:   0 4px 20px rgba(0,0,0,0.35);
+    --tag-new:       #34D399;
+    --tag-new-bg:    rgba(10,124,110,0.2);
+    --tag-fix:       #FCD34D;
+    --tag-fix-bg:    rgba(180,83,9,0.2);
+    --tag-improved:  #93C5FD;
+    --tag-improved-bg: rgba(29,78,216,0.2);
+    --tag-removed:   #FCA5A5;
+    --tag-removed-bg: rgba(185,28,28,0.2);
+  }
+}
+:root[data-theme="dark"] {
+  --ink:         #E2E7F0;
+  --ink-mid:     #A8B4CC;
+  --muted:       #7B8BA8;
+  --rule:        #222C3E;
+  --ground:      #0D1220;
+  --surface:     #151E2E;
+  --accent:      #0DCFC0;
+  --accent-dark: #0ABFAD;
+  --shadow-sm:   0 1px 4px rgba(0,0,0,0.25);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.35);
+  --tag-new:       #34D399;
+  --tag-new-bg:    rgba(10,124,110,0.2);
+  --tag-fix:       #FCD34D;
+  --tag-fix-bg:    rgba(180,83,9,0.2);
+  --tag-improved:  #93C5FD;
+  --tag-improved-bg: rgba(29,78,216,0.2);
+  --tag-removed:   #FCA5A5;
+  --tag-removed-bg: rgba(185,28,28,0.2);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* NAV */
+nav {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  padding-inline: max(24px, 5vw);
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+}
+.nav-logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.nav-logo em { font-style: normal; color: var(--accent); }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0; padding: 0;
+}
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--ink); }
+.btn-nav {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff !important;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.btn-nav:hover { background: var(--accent-dark) !important; }
+
+/* LAYOUT */
+.wrap {
+  max-width: 780px;
+  margin-inline: auto;
+  padding-inline: max(24px, 5vw);
+}
+
+/* PAGE HEADER */
+.page-header {
+  padding-block: 56px 48px;
+  border-bottom: 1px solid var(--rule);
+}
+.page-header h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(32px, 4vw, 46px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin: 0 0 10px;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.page-header p {
+  color: var(--muted);
+  font-size: 15.5px;
+  margin: 0;
+}
+.page-header p a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.page-header p a:hover { text-decoration: underline; }
+
+/* RELEASES */
+.releases {
+  padding-block: 40px 80px;
+}
+
+.release {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 0 32px;
+  padding-block: 36px;
+  border-bottom: 1px solid var(--rule);
+}
+.release:last-child { border-bottom: none; }
+
+.release-meta { padding-top: 3px; }
+
+.release-version {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.release-date {
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  white-space: nowrap;
+}
+
+.release-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--rule);
+  margin-top: 14px;
+  display: none; /* shown on desktop via grid line */
+}
+
+.release-body h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+.release-summary {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+
+.change-list {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.change-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.55;
+}
+
+.tag {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.tag-new      { background: var(--tag-new-bg);      color: var(--tag-new); }
+.tag-fix      { background: var(--tag-fix-bg);      color: var(--tag-fix); }
+.tag-improved { background: var(--tag-improved-bg); color: var(--tag-improved); }
+.tag-removed  { background: var(--tag-removed-bg);  color: var(--tag-removed); }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .release {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .release-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 0;
+  }
+  .release-date { margin-bottom: 0; }
+  nav .nav-links { display: none; }
+}
+</style>
+
+<nav>
+  <a href="/" class="nav-logo">DM<em>XI</em></a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/changelog.html" style="color:var(--ink)">Changelog</a></li>
+    <li><a href="https://app.dmxiaccounting.com" class="btn-nav">Open App →</a></li>
+  </ul>
+</nav>
+
+<div class="wrap">
+  <div class="page-header">
+    <h1>Changelog</h1>
+    <p>Every update to DMXI Accounting, newest first. Open the app at <a href="https://app.dmxiaccounting.com">app.dmxiaccounting.com</a> to get the latest version.</p>
+  </div>
+
+  <div class="releases" id="releases-container">
+    <!-- Releases rendered by JS below -->
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// RELEASES — edit this array to add a new release, then run: wrangler deploy
+// ─────────────────────────────────────────────────────────────────────────────
+const RELEASES = [
+  {
+    version: "v1.4.0",
+    date: "16 Sep 2026",
+    title: "Attachments & Clearer Buttons",
+    summary: "Attach receipts or reference images to purchases, income, and expenses. Buttons across the app now show labels instead of bare icons.",
+    changes: [
+      { type: "new",      text: "Attach photos and PDFs to Purchase entries for reference" },
+      { type: "new",      text: "Attach photos and PDFs to Income (Invoice) entries" },
+      { type: "new",      text: "Attach photos and PDFs to Expense entries" },
+      { type: "improved", text: "Recurring and Attachment row buttons now show SVG icon + text label" },
+      { type: "improved", text: "Statement page redesigned with T-account DR/CR columns, KPI cards, and running balance" },
+      { type: "fix",      text: "All Excel and PDF exports now use company name instead of 'DMXI'" },
+    ]
+  },
+  {
+    version: "v1.3.0",
+    date: "10 Sep 2026",
+    title: "Remote Access via Cloudflare Tunnel",
+    summary: "DMXI can now be reached from mobile and any device over the internet at a permanent URL.",
+    changes: [
+      { type: "new",      text: "Permanent public URL at app.dmxiaccounting.com via Cloudflare Tunnel" },
+      { type: "new",      text: "Mobile-accessible: open the app from your phone over WiFi or cellular" },
+      { type: "improved", text: "Vite dev server now binds to 0.0.0.0 for LAN access" },
+      { type: "improved", text: "PM2 manages tunnel process with auto-restart on crash" },
+    ]
+  },
+  {
+    version: "v1.2.0",
+    date: "2 Sep 2026",
+    title: "Reports & Ledger Improvements",
+    summary: "Daybook, account ledger, and chart of accounts exports now carry the company name on every page.",
+    changes: [
+      { type: "improved", text: "Daybook export includes company name in header" },
+      { type: "improved", text: "Account ledger PDF and Excel branded with company name" },
+      { type: "improved", text: "Chart of Accounts export includes company name" },
+      { type: "improved", text: "Stock Report export now uses company name" },
+      { type: "fix",      text: "Trial Balance totals now round correctly on large datasets" },
+    ]
+  },
+  {
+    version: "v1.1.0",
+    date: "20 Aug 2026",
+    title: "Multi-Company & Stock Management",
+    summary: "Switch between multiple companies without logging out. Stock module added with SKU tracking and valuation reports.",
+    changes: [
+      { type: "new",      text: "Multi-company support — create and switch companies from the top bar" },
+      { type: "new",      text: "Stock management module with SKU-level tracking" },
+      { type: "new",      text: "Stock valuation report with cost of goods sold" },
+      { type: "improved", text: "Company name shown in all report headers" },
+      { type: "fix",      text: "Invoice payment status updates correctly after partial payments" },
+    ]
+  },
+  {
+    version: "v1.0.0",
+    date: "1 Aug 2026",
+    title: "Initial Release",
+    summary: "First release of DMXI Accounting — double-entry ledger, invoicing, purchases, and expenses.",
+    changes: [
+      { type: "new", text: "Double-entry general ledger with chart of accounts" },
+      { type: "new", text: "Invoice creation with payment tracking" },
+      { type: "new", text: "Purchase management with supplier tracking" },
+      { type: "new", text: "Expense logging with recurring entries" },
+      { type: "new", text: "Financial reports: Trial Balance, P&L, Balance Sheet" },
+      { type: "new", text: "Export to Excel and PDF for all reports" },
+    ]
+  }
+];
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TAG_LABELS = { new: "New", fix: "Fix", improved: "Improved", removed: "Removed" };
+
+function render() {
+  const container = document.getElementById("releases-container");
+  container.innerHTML = RELEASES.map(r => `
+    <div class="release">
+      <div class="release-meta">
+        <span class="release-version">${r.version}</span>
+        <span class="release-date">${r.date}</span>
+      </div>
+      <div class="release-body">
+        <h2>${r.title}</h2>
+        <p class="release-summary">${r.summary}</p>
+        <ul class="change-list">
+          ${r.changes.map(c => `
+            <li class="change-item">
+              <span class="tag tag-${c.type}">${TAG_LABELS[c.type] || c.type}</span>
+              <span>${c.text}</span>
+            </li>
+          `).join("")}
+        </ul>
+      </div>
+    </div>
+  `).join("");
+}
+
+render();
+</script>

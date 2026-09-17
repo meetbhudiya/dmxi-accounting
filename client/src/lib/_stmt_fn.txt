@@ -1,0 +1,273 @@
+export function downloadStatementPdf(
+  lines: StatementLine[],
+  meta: StatementExportMeta,
+  companyName = "DMXI",
+) {
+  const doc = new jsPDF(getPaperConfig("portrait"));
+  const W   = doc.internal.pageSize.getWidth();  // 210
+  const H   = doc.internal.pageSize.getHeight(); // 297
+  const m   = 14;
+  const generated = fmtDate(new Date());
+
+  // â”€â”€ Dark navy header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const HDR_HEIGHT = 38;
+  const NAVY: [number,number,number] = [10, 18, 42];
+  const NAVY2: [number,number,number] = [20, 35, 75];
+  doc.setFillColor(...NAVY);
+  doc.rect(0, 0, W, HDR_HEIGHT, "F");
+
+  // Left accent strip
+  doc.setFillColor(...PRIMARY);
+  doc.rect(0, 0, 4, HDR_HEIGHT, "F");
+
+  // Right decorative block
+  doc.setFillColor(...NAVY2);
+  doc.rect(W - 60, 0, 60, HDR_HEIGHT, "F");
+
+  // Company name (large â€” main heading)
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.setTextColor(...WHITE);
+  doc.text(companyName, m + 6, 16);
+
+  // Statement type (smaller, muted)
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(148, 163, 184);
+  doc.text(meta.title.toUpperCase(), m + 6, 25);
+
+  // Subtitle (customer/vendor/brand name + period)
+  if (meta.subtitle) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 140, 200);
+    doc.text(meta.subtitle, m + 6, 33);
+  }
+
+  // Right block: generated date + transaction count
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(148, 163, 184);
+  doc.text("GENERATED", W - 55, 11);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...WHITE);
+  doc.text(generated, W - 55, 19);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(148, 163, 184);
+  doc.text(`${lines.length} transaction${lines.length !== 1 ? "s" : ""}`, W - 55, 27);
+
+  // â”€â”€ KPI tiles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  let ty = HDR_HEIGHT + 6;
+  const kpiBg:   [number,number,number][] = [
+    [232, 240, 254],                     // blue-tint for debit
+    [240, 253, 244],                     // green-tint for credit
+    meta.balance > 0 ? [254, 226, 226] : meta.balance < 0 ? [240, 253, 244] : [241, 245, 249],
+  ];
+  const kpiColor: [number,number,number][] = [
+    PRIMARY,
+    GREEN,
+    meta.balance > 0 ? RED : meta.balance < 0 ? GREEN : MUTED,
+  ];
+  const kpis = [
+    { label: meta.debitHeader + " Total",  value: money(meta.totalDebit) },
+    { label: meta.creditHeader + " Total", value: money(meta.totalCredit) },
+    { label: meta.balanceLabel,            value: money(Math.abs(meta.balance)) + (meta.balance > 0 ? " DR" : meta.balance < 0 ? " CR" : "") },
+  ];
+  const kW = (W - 2 * m - 8) / 3;
+  kpis.forEach((k, i) => {
+    const kx = m + i * (kW + 4);
+    // Card shadow simulation
+    doc.setFillColor(220, 225, 235);
+    doc.roundedRect(kx + 0.5, ty + 0.5, kW, 20, 3, 3, "F");
+    // Card
+    doc.setFillColor(...kpiBg[i]);
+    doc.roundedRect(kx, ty, kW, 20, 3, 3, "F");
+    // Left accent bar
+    doc.setFillColor(...kpiColor[i]);
+    doc.roundedRect(kx, ty, 3, 20, 1, 1, "F");
+    // Label
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...MUTED);
+    doc.text(k.label.toUpperCase(), kx + 7, ty + 7);
+    // Value
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(...kpiColor[i]);
+    doc.text(k.value, kx + 7, ty + 16);
+  });
+  ty += 27;
+
+  // â”€â”€ Transaction table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const head: string[] = ["Date", "Voucher", "Ref No.", "Type"];
+  if (meta.showVendor) head.push("Vendor");
+  head.push("Description", meta.debitHeader, meta.creditHeader, "Balance");
+
+  const body = lines.map((l) => {
+    const row: string[] = [fmtDate(l.date), l.voucherNo, l.reference ?? "â€”", l.type];
+    if (meta.showVendor) row.push(l.vendor ?? "â€”");
+    row.push(
+      l.description,
+      l.debit  > 0 ? money(l.debit)  : "â€”",
+      l.credit > 0 ? money(l.credit) : "â€”",
+      money(l.balance),
+    );
+    return row;
+  });
+
+  // column index of first numeric col: date(0)+voucher(1)+ref(2)+type(3)+vendor?(1)+desc(1)
+  const numOff = 4 + (meta.showVendor ? 1 : 0) + 1;
+
+  // Type column index is always 3
+  const typeColIdx = 3;
+
+  autoTable(doc, {
+    startY: ty,
+    margin: { left: m, right: m },
+    head: [head],
+    body,
+    headStyles: {
+      fillColor: [15, 23, 42] as [number,number,number],
+      textColor: WHITE,
+      fontStyle: "bold",
+      fontSize: 7.5,
+      cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+    },
+    bodyStyles: {
+      fontSize: 7,
+      cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
+      textColor: DARK,
+    },
+    alternateRowStyles: { fillColor: [248, 250, 252] as [number,number,number] },
+    columnStyles: {
+      0: { cellWidth: 18 },                                          // Date
+      1: { cellWidth: 22, fontStyle: "bold" },                      // Voucher
+      2: { cellWidth: 26, overflow: "ellipsize" },                   // Ref No.
+      3: { cellWidth: 14 },                                          // Type
+      [numOff]:     { halign: "right", cellWidth: 22 },
+      [numOff + 1]: { halign: "right", cellWidth: 22 },
+      [numOff + 2]: { halign: "right", cellWidth: 24, fontStyle: "bold" },
+    },
+    tableLineColor: [226, 232, 240] as [number,number,number],
+    tableLineWidth: 0.1,
+
+    didParseCell(data) {
+      if (data.section === "body" && data.column.index === typeColIdx) {
+        const raw = (data.row.raw as string[])[typeColIdx];
+        data.cell.styles.textColor = typeColor(raw);
+        data.cell.styles.fontStyle = "bold";
+        data.cell.styles.fontSize  = 7;
+      }
+    },
+
+    didDrawCell(data) {
+      if (data.section !== "body") return;
+      const line = lines[data.row.index];
+      if (!line) return;
+      if (data.column.index === numOff + 2) {
+        const val = Number(line.balance);
+        if (!isNaN(val) && val !== 0)
+          data.cell.styles.textColor = val > 0 ? [220, 38, 38] : [22, 163, 74];
+      }
+      if (data.column.index === numOff && Number(line.debit) > 0)
+        data.cell.styles.textColor = [220, 38, 38];
+      if (data.column.index === numOff + 1 && Number(line.credit) > 0)
+        data.cell.styles.textColor = [22, 163, 74];
+    },
+
+  });
+
+  // â”€â”€ Summary cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const tblFinalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+
+  if (tblFinalY + 28 < H - 16) {
+    const sy       = tblFinalY + 6;
+    const cardGap  = 4;
+    const cardW    = (W - 2 * m - 2 * cardGap) / 3;
+    const cardH    = 20;
+
+    const summaryCards = [
+      {
+        label: meta.debitHeader + " Total",
+        value: money(meta.totalDebit),
+        bg:    [232, 240, 254] as [number,number,number],
+        accent: PRIMARY,
+        fg:    PRIMARY,
+      },
+      {
+        label: meta.creditHeader + " Total",
+        value: money(meta.totalCredit),
+        bg:    [240, 253, 244] as [number,number,number],
+        accent: GREEN,
+        fg:    GREEN,
+      },
+      {
+        label: meta.balanceLabel,
+        value: money(Math.abs(meta.balance)) + (meta.balance > 0 ? " DR" : meta.balance < 0 ? " CR" : ""),
+        bg:    (meta.balance > 0 ? [254, 226, 226] : meta.balance < 0 ? [240, 253, 244] : [241, 245, 249]) as [number,number,number],
+        accent: kpiColor[2],
+        fg:    kpiColor[2],
+      },
+    ];
+
+    // Section title above cards
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(...MUTED);
+    doc.text("SUMMARY", m, sy - 2);
+
+    summaryCards.forEach((card, i) => {
+      const cx = m + i * (cardW + cardGap);
+      // Drop-shadow
+      doc.setFillColor(210, 218, 232);
+      doc.roundedRect(cx + 0.6, sy + 0.6, cardW, cardH, 3, 3, "F");
+      // Card body
+      doc.setFillColor(...card.bg);
+      doc.roundedRect(cx, sy, cardW, cardH, 3, 3, "F");
+      // Left accent bar
+      doc.setFillColor(...card.accent);
+      doc.roundedRect(cx, sy, 3, cardH, 1.5, 1.5, "F");
+      // Label
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.5);
+      doc.setTextColor(...MUTED);
+      doc.text(card.label.toUpperCase(), cx + 7, sy + 7);
+      // Value
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...card.fg);
+      doc.text(card.value, cx + 7, sy + 16);
+    });
+  }
+
+  // â”€â”€ Per-page footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const totalPages = doc.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    // Thin accent line
+    doc.setDrawColor(...PRIMARY);
+    doc.setLineWidth(0.5);
+    doc.line(m, H - 10, W - m, H - 10);
+    // Left: company + statement
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(...MUTED);
+    doc.text(`${companyName}  Â·  ${meta.title}`, m, H - 5.5);
+    // Center: page number
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    doc.setTextColor(...PRIMARY);
+    doc.text(`Page ${i} / ${totalPages}`, W / 2, H - 5.5, { align: "center" });
+    // Right: branding
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    doc.setTextColor(...MUTED);
+    doc.text("Powered by DMXI", W - m, H - 5.5, { align: "right" });
+  }
+
+  const slug = meta.title.replace(/[^a-zA-Z0-9]+/g, "_");
+  triggerDownload(doc, `Statement_${slug}_${new Date().toISOString().slice(0, 10)}.pdf`);
+}
+

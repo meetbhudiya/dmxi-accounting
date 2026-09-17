@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+client/dist/
+server/dist/
+release/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+server/.env
+release/.env
+
+# Prisma
+server/prisma/migrations/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Uploads (user files - not in git)
+server/uploads/
+
+# Cloudflare
+dmxi-website/.wrangler/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Misc local files
+tunnel-url.txt

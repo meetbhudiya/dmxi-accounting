@@ -1,0 +1,179 @@
+<title>DMXI Invoice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<style>
+:root {
+  --ink:#141923; --muted:#5F6B84; --rule:#DFE4EC;
+  --ground:#F2F5F9; --surface:#FFFFFF; --accent:#0ABFAD;
+  --credit:#16A34A; --debit:#DC2626;
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  color:var(--ink);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#E2E7F0;--muted:#7B8BA8;--rule:#222C3E;
+    --ground:#0D1220;--surface:#151E2E;
+  }
+}
+:root[data-theme="dark"]{--ink:#E2E7F0;--muted:#7B8BA8;--rule:#222C3E;--ground:#0D1220;--surface:#151E2E;}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;background:var(--ground);color:var(--ink);font-size:14px;line-height:1.6;}
+.page{max-width:760px;margin-inline:auto;padding:32px max(24px,5vw) 64px;}
+.brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;flex-wrap:wrap;gap:12px;}
+.brand-name{font-family:'Fraunces',serif;font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.brand-name em{font-style:normal;color:var(--accent);}
+.brand-tag{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.inv-box{background:var(--surface);border:1px solid var(--rule);border-radius:10px;overflow:hidden;}
+.inv-header{padding:24px 24px 20px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.inv-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-0.02em;}
+.status-pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;font-family:'IBM Plex Mono',monospace;}
+.status-DRAFT{background:#f1f5f9;color:#64748b;}
+.status-SENT{background:#dbeafe;color:#1d4ed8;}
+.status-PARTIALLY_PAID{background:#fef3c7;color:#b45309;}
+.status-PAID{background:#dcfce7;color:#16a34a;}
+.status-OVERDUE{background:#fee2e2;color:#dc2626;}
+.status-VOID{background:#f1f5f9;color:#64748b;text-decoration:line-through;}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;font-size:13px;}
+.meta-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.07em;font-weight:600;}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 24px;border-bottom:1px solid var(--rule);}
+.party-label{font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.party-name{font-weight:600;font-size:14px;}
+.party-sub{font-size:13px;color:var(--muted);}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;}
+th{background:color-mix(in srgb,var(--ground) 60%,transparent);color:var(--muted);font-size:11px;letter-spacing:0.07em;text-transform:uppercase;font-weight:600;padding:9px 16px;text-align:left;border-bottom:1px solid var(--rule);}
+th.r{text-align:right;}
+td{padding:10px 16px;border-bottom:1px solid var(--rule);}
+td.r{text-align:right;}
+tr:last-child td{border-bottom:none;}
+.totals{padding:16px 24px;border-top:1px solid var(--rule);}
+.total-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--muted);}
+.total-row.grand{font-size:16px;font-weight:700;color:var(--ink);padding-top:10px;margin-top:6px;border-top:2px solid var(--rule);}
+.total-row.due{color:var(--credit);font-size:14px;font-weight:600;}
+.notes-box{padding:16px 24px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted);}
+.notes-label{font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.footer-bar{margin-top:24px;text-align:center;font-size:12px;color:var(--muted);}
+.footer-bar a{color:var(--accent);text-decoration:none;}
+.err{padding:60px 24px;text-align:center;color:var(--muted);}
+.err h2{color:var(--ink);font-family:'Fraunces',serif;font-size:22px;margin-bottom:8px;}
+@media print{.footer-bar{display:none;}}
+@media(max-width:540px){
+  .parties,.meta-grid{grid-template-columns:1fr;}
+  .inv-header{flex-direction:column;}
+}
+</style>
+
+<div class="page" id="root">
+  <div class="err"><h2>Redirecting…</h2><p>Please wait.</p></div>
+</div>
+
+<script>
+// Redirect to the app subdomain where same-origin API calls work
+location.replace('https://app.dmxiaccounting.com/i.html' + location.search);
+</script>
+<script>
+const API = 'https://app.dmxiaccounting.com/api';
+
+function fmt(n) {
+  return Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtDate(d) {
+  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+async function load() {
+  const token = new URLSearchParams(location.search).get('t');
+  const root = document.getElementById('root');
+  if (!token) { root.innerHTML = '<div class="err"><h2>Invalid link</h2><p>No invoice token found in this URL.</p></div>'; return; }
+
+  let inv;
+  try {
+    const r = await fetch(`${API}/public/invoices/${token}`);
+    if (!r.ok) throw new Error((await r.json()).error || 'Not found');
+    inv = await r.json();
+  } catch(e) {
+    root.innerHTML = `<div class="err"><h2>Invoice not available</h2><p>${e.message}</p></div>`;
+    return;
+  }
+
+  const statusLabel = {
+    DRAFT:'Draft', SENT:'Sent', PARTIALLY_PAID:'Partially Paid',
+    PAID:'Paid', OVERDUE:'Overdue', VOID:'Void'
+  }[inv.status] || inv.status;
+
+  root.innerHTML = `
+    <div class="brand">
+      <div>
+        <div class="brand-name">DM<em>XI</em></div>
+        <div class="brand-tag">${inv.companyName}</div>
+      </div>
+      <button onclick="window.print()" style="font-size:13px;padding:8px 18px;border:1px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer;font-weight:500;">Print / Save PDF</button>
+    </div>
+
+    <div class="inv-box">
+      <div class="inv-header">
+        <div>
+          <div class="inv-title">Invoice ${inv.number}</div>
+          <span class="status-pill status-${inv.status}">${statusLabel}</span>
+          ${inv.reference ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;">Ref: ${inv.reference}</div>` : ''}
+        </div>
+        <div class="meta-grid">
+          <div><div class="meta-label">Issue Date</div>${fmtDate(inv.issueDate)}</div>
+          <div><div class="meta-label">Due Date</div>${fmtDate(inv.dueDate)}</div>
+        </div>
+      </div>
+
+      <div class="parties">
+        <div>
+          <div class="party-label">From</div>
+          <div class="party-name">${inv.companyName}</div>
+        </div>
+        <div>
+          <div class="party-label">Bill To</div>
+          <div class="party-name">${inv.customer.name}</div>
+          ${inv.customer.email ? `<div class="party-sub">${inv.customer.email}</div>` : ''}
+          ${inv.customer.phone ? `<div class="party-sub">${inv.customer.phone}</div>` : ''}
+          ${inv.customer.address ? `<div class="party-sub">${inv.customer.address}</div>` : ''}
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th class="r">Qty</th>
+              <th class="r">Unit Price</th>
+              <th class="r">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${inv.items.map(i => `<tr>
+              <td>${i.description}${i.product ? ` <span style="color:var(--muted);font-size:12px;">(${i.product})</span>` : ''}</td>
+              <td class="r">${fmt(i.quantity)}</td>
+              <td class="r">${fmt(i.unitPrice)}</td>
+              <td class="r">${fmt(i.lineTotal)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totals">
+        <div class="total-row"><span>Subtotal</span><span>${fmt(inv.subtotal)}</span></div>
+        ${inv.discountPercent > 0 ? `<div class="total-row"><span>Discount (${inv.discountPercent}%)</span><span>−${fmt(inv.discountAmount)}</span></div>` : ''}
+        ${inv.vatPercent > 0 ? `<div class="total-row"><span>VAT (${inv.vatPercent}%)</span><span>${fmt(inv.vatAmount)}</span></div>` : ''}
+        <div class="total-row grand"><span>Total</span><span>${fmt(inv.total)}</span></div>
+        ${inv.amountPaid > 0 ? `<div class="total-row"><span>Amount Paid</span><span>${fmt(inv.amountPaid)}</span></div>` : ''}
+        ${inv.amountDue > 0 ? `<div class="total-row due"><span>Amount Due</span><span>${fmt(inv.amountDue)}</span></div>` : ''}
+      </div>
+
+      ${inv.notes ? `<div class="notes-box"><div class="notes-label">Notes</div>${inv.notes}</div>` : ''}
+    </div>
+
+    <div class="footer-bar">
+      Invoice generated by <a href="https://dmxiaccounting.com">DMXI Accounting</a>
+    </div>
+  `;
+}
+
+load();
+</script>

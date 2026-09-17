@@ -1,0 +1,714 @@
+<title>DMXI Accounting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root {
+  --ink:         #141923;
+  --ink-mid:     #3A4459;
+  --muted:       #5F6B84;
+  --rule:        #DFE4EC;
+  --ground:      #F2F5F9;
+  --surface:     #FFFFFF;
+  --accent:      #0ABFAD;
+  --accent-dark: #088B7D;
+  --credit:      #16A34A;
+  --debit:       #DC2626;
+  --shadow-sm:   0 1px 4px rgba(20,25,35,0.07);
+  --shadow-md:   0 4px 20px rgba(20,25,35,0.10);
+
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  color: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink:         #E2E7F0;
+    --ink-mid:     #A8B4CC;
+    --muted:       #7B8BA8;
+    --rule:        #222C3E;
+    --ground:      #0D1220;
+    --surface:     #151E2E;
+    --accent:      #0DCFC0;
+    --accent-dark: #0ABFAD;
+    --shadow-sm:   0 1px 4px rgba(0,0,0,0.25);
+    --shadow-md:   0 4px 20px rgba(0,0,0,0.35);
+  }
+}
+:root[data-theme="dark"] {
+  --ink:         #E2E7F0;
+  --ink-mid:     #A8B4CC;
+  --muted:       #7B8BA8;
+  --rule:        #222C3E;
+  --ground:      #0D1220;
+  --surface:     #151E2E;
+  --accent:      #0DCFC0;
+  --accent-dark: #0ABFAD;
+  --shadow-sm:   0 1px 4px rgba(0,0,0,0.25);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.35);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  padding-inline: max(24px, 5vw);
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.nav-logo em { font-style: normal; color: var(--accent); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0; padding: 0;
+}
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--ink); }
+.btn-nav {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff !important;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-nav:hover { background: var(--accent-dark) !important; transform: translateY(-1px); }
+
+/* ─── LAYOUT WRAPPER ─── */
+.wrap {
+  max-width: 1100px;
+  margin-inline: auto;
+  padding-inline: max(24px, 5vw);
+}
+
+/* ─── HERO ─── */
+.hero {
+  padding-block: 72px 64px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 52px;
+  align-items: center;
+}
+.hero-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 22px;
+  opacity: 0.9;
+}
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(34px, 4.5vw, 56px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  margin: 0 0 22px;
+  color: var(--ink);
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-sub {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.75;
+  max-width: 42ch;
+  margin: 0 0 36px;
+}
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.btn-ghost:hover { color: var(--ink); }
+
+/* ─── LEDGER DEMO ─── */
+.ledger-demo {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.ledger-topbar {
+  background: #18293B;
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ledger-dots { display: flex; gap: 6px; }
+.ledger-dots span {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+}
+.ledger-acct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.06em;
+}
+.ledger-pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+  background: rgba(10,191,173,0.22);
+  color: #0DCFC0;
+}
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.ledger-table th {
+  background: color-mix(in srgb, var(--ground) 70%, transparent);
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--rule);
+  font-weight: 600;
+}
+.ledger-table th.r { text-align: right; }
+.ledger-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.ledger-table td.r { text-align: right; }
+.ledger-table td.dt { color: var(--muted); font-size: 11px; }
+.ledger-table td.dr-val { color: var(--debit); }
+.ledger-table td.cr-val { color: var(--credit); }
+.ledger-table td.bal-val {
+  color: var(--ink);
+  font-weight: 500;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.ledger-table tr:last-child td { border-bottom: none; }
+.ledger-foot {
+  padding: 9px 14px;
+  border-top: 2px double var(--rule);
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  color: var(--muted);
+}
+.ledger-foot .c-bal { color: var(--credit); }
+
+@keyframes fadeRow {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ledger-table tbody tr { animation: fadeRow 0.45s ease both; }
+.ledger-table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+.ledger-table tbody tr:nth-child(2) { animation-delay: 0.20s; }
+.ledger-table tbody tr:nth-child(3) { animation-delay: 0.35s; }
+.ledger-table tbody tr:nth-child(4) { animation-delay: 0.50s; }
+.ledger-table tbody tr:nth-child(5) { animation-delay: 0.65s; }
+@media (prefers-reduced-motion: reduce) {
+  .ledger-table tbody tr { animation: none; }
+}
+
+/* ─── STATS BAR ─── */
+.stats-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding-block: 36px;
+}
+.stats-inner {
+  display: flex;
+  justify-content: space-around;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.stat { text-align: center; }
+.stat-n {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.stat-l { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+/* ─── SECTION SHARED ─── */
+.section { padding-block: 72px; }
+.sec-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+.sec-sub {
+  color: var(--muted);
+  font-size: 15.5px;
+  line-height: 1.75;
+  max-width: 52ch;
+  margin: 0 0 52px;
+}
+
+/* ─── FEATURES GRID ─── */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.feat-card {
+  background: var(--surface);
+  padding: 28px 24px;
+  transition: background 0.15s;
+}
+.feat-card:hover { background: color-mix(in srgb, var(--accent) 4%, var(--surface)); }
+.feat-icon {
+  width: 42px; height: 42px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  color: var(--accent);
+}
+.feat-icon svg { width: 20px; height: 20px; }
+.feat-title { font-size: 14.5px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+.feat-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin: 0; }
+
+/* ─── WORKFLOW ─── */
+.workflow-section {
+  background: var(--surface);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding-block: 72px;
+}
+.steps-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  position: relative;
+}
+.steps-row::after {
+  content: '';
+  position: absolute;
+  top: 21px;
+  left: calc(50% / 3 + 21px);
+  right: calc(50% / 3 + 21px);
+  height: 1px;
+  background: var(--rule);
+}
+.step { padding: 0 28px; text-align: center; }
+.step-n {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  background: var(--surface);
+  position: relative;
+  z-index: 1;
+}
+.step-title { font-size: 15px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
+.step-desc  { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin: 0; }
+
+/* ─── CTA ─── */
+.cta-section { padding-block: 72px; }
+.cta-box {
+  background: #18293B;
+  border-radius: 14px;
+  padding: 64px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 40%, rgba(10,191,173,0.22) 0%, transparent 55%);
+  pointer-events: none;
+}
+.cta-box h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(26px, 3.5vw, 40px);
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  margin: 0 0 14px;
+  position: relative;
+}
+.cta-box p {
+  color: rgba(255,255,255,0.6);
+  font-size: 16px;
+  max-width: 46ch;
+  margin-inline: auto;
+  margin-bottom: 36px;
+  position: relative;
+}
+.cta-box .btn-primary {
+  font-size: 16px;
+  padding: 14px 36px;
+  position: relative;
+}
+.cta-url {
+  display: block;
+  margin-top: 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.05em;
+  position: relative;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  border-top: 1px solid var(--rule);
+  padding-block: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.foot-logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.3px;
+}
+.foot-logo em { font-style: normal; color: var(--accent); }
+.foot-copy { font-size: 12.5px; color: var(--muted); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 720px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding-block: 48px 40px;
+    gap: 36px;
+  }
+  .feat-grid { grid-template-columns: 1fr; }
+  .steps-row { grid-template-columns: 1fr; gap: 32px; }
+  .steps-row::after { display: none; }
+  .step { padding: 0; text-align: left; display: flex; gap: 16px; align-items: flex-start; }
+  .step-n { margin: 0; flex-shrink: 0; }
+  nav .nav-links { display: none; }
+  .cta-box { padding: 44px 24px; }
+}
+</style>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <a href="#" class="nav-logo">DM<em>XI</em></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="/changelog.html">Changelog</a></li>
+    <li><a href="https://app.dmxiaccounting.com" class="btn-nav">Open App →</a></li>
+  </ul>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="wrap">
+  <div class="hero">
+    <div>
+      <span class="hero-eyebrow">Cloud Accounting Software</span>
+      <h1>Books that <em>balance,</em> business&nbsp;that grows</h1>
+      <p class="hero-sub">DMXI brings double-entry ledger accounting, invoicing, purchases, expenses, and stock control into one system your team can open from any device.</p>
+      <div class="hero-actions">
+        <a href="https://app.dmxiaccounting.com" class="btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg>
+          Open the App
+        </a>
+        <a href="#features" class="btn-ghost">
+          See what's inside
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Live ledger preview -->
+    <div class="ledger-demo" role="img" aria-label="Sample Cash & Bank ledger from DMXI Accounting">
+      <div class="ledger-topbar">
+        <div class="ledger-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="ledger-acct">CASH &amp; BANK ACCOUNT</span>
+        <span class="ledger-pill">LIVE</span>
+      </div>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Narration</th>
+            <th class="r">DR</th>
+            <th class="r">CR</th>
+            <th class="r">Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="dt">01 Sep</td>
+            <td>Opening balance</td>
+            <td class="r dr-val">—</td>
+            <td class="r cr-val">—</td>
+            <td class="r bal-val">50,000.00</td>
+          </tr>
+          <tr>
+            <td class="dt">03 Sep</td>
+            <td>Client Invoice #1042</td>
+            <td class="r dr-val">120,000.00</td>
+            <td class="r cr-val">—</td>
+            <td class="r bal-val">170,000.00</td>
+          </tr>
+          <tr>
+            <td class="dt">07 Sep</td>
+            <td>Office Supplies — Exp.</td>
+            <td class="r dr-val">—</td>
+            <td class="r cr-val">4,800.00</td>
+            <td class="r bal-val">165,200.00</td>
+          </tr>
+          <tr>
+            <td class="dt">12 Sep</td>
+            <td>Supplier Pmt #P-088</td>
+            <td class="r dr-val">—</td>
+            <td class="r cr-val">32,500.00</td>
+            <td class="r bal-val">132,700.00</td>
+          </tr>
+          <tr>
+            <td class="dt">15 Sep</td>
+            <td>Client Invoice #1051</td>
+            <td class="r dr-val">88,000.00</td>
+            <td class="r cr-val">—</td>
+            <td class="r bal-val">220,700.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="ledger-foot">
+        <span>Closing Balance &mdash; Sep 2026</span>
+        <span class="c-bal">KES 220,700.00 DR</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STATS BAR ─── -->
+<div class="stats-bar">
+  <div class="wrap">
+    <div class="stats-inner">
+      <div class="stat">
+        <div class="stat-n">100%</div>
+        <div class="stat-l">Double-entry compliance</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n">6+</div>
+        <div class="stat-l">Accounting modules</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n">∞</div>
+        <div class="stat-l">Companies per account</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n">0</div>
+        <div class="stat-l">Monthly fee</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FEATURES ─── -->
+<section class="section wrap" id="features">
+  <h2 class="sec-title">Everything your books need</h2>
+  <p class="sec-sub">Built for accountants who want precision and business owners who want clarity — without two separate systems.</p>
+
+  <div class="feat-grid">
+    <!-- row 1 -->
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="12" y1="9" x2="12" y2="21"/></svg>
+      </div>
+      <div class="feat-title">Double-Entry Ledger</div>
+      <p class="feat-desc">Every transaction posts balanced DR and CR entries. Trial Balance, P&amp;L, and Balance Sheet always reconcile — no manual checking.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div class="feat-title">Invoicing</div>
+      <p class="feat-desc">Create numbered invoices, record full or partial payments, and track outstanding receivables by client at a glance.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      </div>
+      <div class="feat-title">Purchases</div>
+      <p class="feat-desc">Log supplier bills with voucher numbers, track what's paid and what's outstanding, and attach scanned receipts for a full audit trail.</p>
+    </div>
+    <!-- row 2 -->
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="feat-title">Expenses</div>
+      <p class="feat-desc">Categorise operating costs by account code, set up recurring entries for rent and utilities, and export any period to PDF or Excel.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="feat-title">Financial Reports</div>
+      <p class="feat-desc">Trial Balance, Profit &amp; Loss, Balance Sheet, daybook, and account statements — with one-click Excel or PDF export branded with your company name.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <div class="feat-title">Stock Management</div>
+      <p class="feat-desc">Track inventory by SKU, record movements in and out, and generate stock valuation reports with cost of goods sold analysis.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="workflow-section" id="how-it-works">
+  <div class="wrap">
+    <h2 class="sec-title">Set up in minutes</h2>
+    <p class="sec-sub" style="margin-bottom: 56px;">No accounting firm required to get started. Add your company, chart of accounts is pre-seeded with standard codes, and start entering transactions.</p>
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div>
+          <div class="step-title">Create your company</div>
+          <p class="step-desc">Register, add a company name and base currency. Your chart of accounts is pre-loaded with standard account codes ready to use.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div>
+          <div class="step-title">Enter transactions</div>
+          <p class="step-desc">Record income, expenses, purchases, and manual journal entries. Attach receipts or bills to any transaction for paperless record-keeping.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div>
+          <div class="step-title">Run your reports</div>
+          <p class="step-desc">Pull Trial Balance, P&amp;L, or Balance Sheet for any date range. Export with your company name to hand to your accountant or auditor.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ─── -->
+<section class="cta-section wrap">
+  <div class="cta-box">
+    <h2>Your books, always in order</h2>
+    <p>Open DMXI Accounting from any browser, on any device — desktop, tablet, or mobile. No install required.</p>
+    <a href="https://app.dmxiaccounting.com" class="btn-primary">
+      Start using DMXI →
+    </a>
+    <span class="cta-url">app.dmxiaccounting.com</span>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="wrap">
+  <a href="#" class="foot-logo">DM<em>XI</em> Accounting</a>
+  <span class="foot-copy">© 2026 DMXI · Built for growing businesses</span>
+</footer>

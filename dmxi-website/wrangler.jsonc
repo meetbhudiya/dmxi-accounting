@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dmxi-website",
+  "compatibility_date": "2026-09-15",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "."
+  },
+  "routes": [
+    { "pattern": "dmxiaccounting.com", "custom_domain": true },
+    { "pattern": "www.dmxiaccounting.com", "custom_domain": true }
+  ]
+}

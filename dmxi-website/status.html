@@ -1,0 +1,158 @@
+<title>DMXI Status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+:root {
+  --ink: #141923; --muted: #5F6B84; --rule: #DFE4EC;
+  --ground: #F2F5F9; --surface: #FFFFFF;
+  --accent: #0ABFAD;
+  --ok: #16A34A; --ok-bg: #DCFCE7;
+  --warn: #B45309; --warn-bg: #FEF3C7;
+  --err: #DC2626; --err-bg: #FEE2E2;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #E2E7F0; --muted: #7B8BA8; --rule: #222C3E;
+    --ground: #0D1220; --surface: #151E2E;
+    --ok: #34D399; --ok-bg: rgba(22,163,74,0.18);
+    --warn: #FCD34D; --warn-bg: rgba(180,83,9,0.18);
+    --err: #FCA5A5; --err-bg: rgba(220,38,38,0.18);
+  }
+}
+:root[data-theme="dark"] {
+  --ink: #E2E7F0; --muted: #7B8BA8; --rule: #222C3E;
+  --ground: #0D1220; --surface: #151E2E;
+  --ok: #34D399; --ok-bg: rgba(22,163,74,0.18);
+  --warn: #FCD34D; --warn-bg: rgba(180,83,9,0.18);
+  --err: #FCA5A5; --err-bg: rgba(220,38,38,0.18);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font-size: 15px; }
+nav {
+  background: var(--surface); border-bottom: 1px solid var(--rule);
+  padding: 0 max(24px,5vw); height: 58px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo { font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--ink); text-decoration:none; }
+.nav-logo em { font-style:normal; color:var(--accent); }
+.btn-nav { background:var(--accent); color:#fff; padding:8px 20px; border-radius:6px; font-weight:600; font-size:14px; text-decoration:none; }
+.wrap { max-width:640px; margin-inline:auto; padding-inline:max(24px,5vw); }
+.page-header { padding-block:52px 40px; }
+.page-header h1 { font-family:'Fraunces',serif; font-size:clamp(28px,4vw,40px); font-weight:600; letter-spacing:-0.02em; margin:0 0 8px; }
+.page-header p { color:var(--muted); margin:0; font-size:14px; }
+.status-card {
+  background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+  overflow:hidden; margin-bottom:16px;
+}
+.status-row {
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:16px 20px; border-bottom:1px solid var(--rule);
+}
+.status-row:last-child { border-bottom:none; }
+.svc-name { font-weight:600; font-size:14px; }
+.svc-desc { font-size:12px; color:var(--muted); margin-top:2px; }
+.pill {
+  display:flex; align-items:center; gap:6px;
+  font-size:12px; font-weight:600; padding:4px 12px;
+  border-radius:20px; white-space:nowrap;
+  font-family:'IBM Plex Mono',monospace;
+}
+.pill-ok   { background:var(--ok-bg);   color:var(--ok); }
+.pill-warn { background:var(--warn-bg); color:var(--warn); }
+.pill-err  { background:var(--err-bg);  color:var(--err); }
+.dot { width:7px; height:7px; border-radius:50%; background:currentColor; }
+.meta { padding:20px; font-size:12px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.meta span { font-family:'IBM Plex Mono',monospace; }
+footer { border-top:1px solid var(--rule); padding-block:28px; margin-top:40px; font-size:12.5px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.foot-logo { font-family:'Fraunces',serif; font-weight:700; font-size:16px; color:var(--ink); text-decoration:none; }
+.foot-logo em { font-style:normal; color:var(--accent); }
+</style>
+
+<nav>
+  <a href="/" class="nav-logo">DM<em>XI</em></a>
+  <a href="https://app.dmxiaccounting.com" class="btn-nav">Open App →</a>
+</nav>
+
+<div class="wrap">
+  <div class="page-header">
+    <h1>System Status</h1>
+    <p>Live status of DMXI Accounting services. Refreshes every 30 seconds.</p>
+  </div>
+
+  <div class="status-card" id="services-card">
+    <div class="status-row">
+      <div>
+        <div class="svc-name">App (app.dmxiaccounting.com)</div>
+        <div class="svc-desc">Login, invoices, reports, all features</div>
+      </div>
+      <div class="pill pill-warn" id="pill-app"><span class="dot"></span> Checking…</div>
+    </div>
+    <div class="status-row">
+      <div>
+        <div class="svc-name">API Server</div>
+        <div class="svc-desc">Database, authentication, data endpoints</div>
+      </div>
+      <div class="pill pill-warn" id="pill-api"><span class="dot"></span> Checking…</div>
+    </div>
+    <div class="status-row">
+      <div>
+        <div class="svc-name">Website (dmxiaccounting.com)</div>
+        <div class="svc-desc">Marketing site, changelog, public links</div>
+      </div>
+      <div class="pill pill-ok" id="pill-web"><span class="dot"></span> Operational</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <span>Last checked: <span id="last-checked">—</span></span>
+    <span>Next refresh in <span id="countdown">30</span>s</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <footer>
+    <a href="/" class="foot-logo">DM<em>XI</em> Accounting</a>
+    <span><a href="/changelog.html" style="color:var(--muted)">Changelog</a> · <a href="https://app.dmxiaccounting.com" style="color:var(--muted)">Open App</a></span>
+  </footer>
+</div>
+
+<script>
+function setPill(id, state) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'pill pill-' + (state === 'ok' ? 'ok' : state === 'err' ? 'err' : 'warn');
+  el.innerHTML = '<span class="dot"></span> ' + (state === 'ok' ? 'Operational' : state === 'err' ? 'Disrupted' : 'Checking…');
+}
+
+async function check() {
+  // Check API health
+  try {
+    const r = await fetch('https://app.dmxiaccounting.com/api/health', { signal: AbortSignal.timeout(6000) });
+    if (r.ok) {
+      const d = await r.json();
+      setPill('pill-api', d.status === 'ok' ? 'ok' : 'err');
+      setPill('pill-app', 'ok');
+    } else {
+      setPill('pill-api', 'err');
+      setPill('pill-app', 'err');
+    }
+  } catch {
+    setPill('pill-api', 'err');
+    setPill('pill-app', 'err');
+  }
+
+  const now = new Date();
+  document.getElementById('last-checked').textContent =
+    now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+let secs = 30;
+function tick() {
+  document.getElementById('countdown').textContent = secs;
+  if (secs <= 0) { secs = 30; check(); } else secs--;
+}
+
+check();
+setInterval(tick, 1000);
+</script>
