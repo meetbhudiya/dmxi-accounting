@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Prisma, AccountType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+type AccountType = "ASSET" | "LIABILITY" | "EQUITY" | "REVENUE" | "EXPENSE";
 import { prisma } from "../lib/prisma";
 import { CompanyScopedRequest, requireCompanyMember } from "../middleware/company";
 
@@ -48,7 +49,7 @@ reportsRouter.get("/profit-and-loss", async (req: CompanyScopedRequest, res) => 
       code: account.code,
       name: account.name,
       type: account.type,
-      amount: netForAccount(account.type, totals.debit, totals.credit),
+      amount: netForAccount(account.type as AccountType, totals.debit, totals.credit),
     };
   });
 
@@ -90,7 +91,7 @@ reportsRouter.get("/balance-sheet", async (req: CompanyScopedRequest, res) => {
       (acc, l) => ({ debit: acc.debit.plus(l.debit), credit: acc.credit.plus(l.credit) }),
       { debit: new Prisma.Decimal(0), credit: new Prisma.Decimal(0) }
     );
-    return netForAccount(account.type, totals.debit, totals.credit);
+    return netForAccount(account.type as AccountType, totals.debit, totals.credit);
   };
 
   const byType = (type: AccountType) =>
@@ -139,7 +140,7 @@ reportsRouter.get("/cash-flow", async (req: CompanyScopedRequest, res) => {
     where: {
       companyId: req.companyId!,
       type: "ASSET",
-      name: { contains: "Cash", mode: "insensitive" },
+      name: { contains: "Cash" },
     },
   });
   const cashAccountIds = cashAccounts.map((a) => a.id);

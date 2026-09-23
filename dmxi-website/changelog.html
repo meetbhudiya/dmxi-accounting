@@ -1,7 +1,7 @@
-<title>DMXI Changelog</title>
+<title>Changelog — DMXI Accounting</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 
 <style>
 :root {
@@ -15,14 +15,15 @@
   --accent-dark: #088B7D;
   --shadow-sm:   0 1px 4px rgba(20,25,35,0.07);
   --shadow-md:   0 4px 20px rgba(20,25,35,0.10);
-  --tag-new:       #0A7C6E;
-  --tag-new-bg:    #DCFDF8;
-  --tag-fix:       #B45309;
-  --tag-fix-bg:    #FEF3C7;
-  --tag-improved:  #1D4ED8;
-  --tag-improved-bg: #DBEAFE;
-  --tag-removed:   #B91C1C;
-  --tag-removed-bg:#FEE2E2;
+  --c-new:  #0ABFAD;
+  --c-fix:  #2563EB;
+  --c-imp:  #7C3AED;
+  --c-sec:  #DC2626;
+  --bg-new: rgba(10,191,173,0.09);
+  --bg-fix: rgba(37,99,235,0.09);
+  --bg-imp: rgba(124,58,237,0.09);
+  --bg-sec: rgba(220,38,38,0.09);
+
   font-family: 'IBM Plex Sans', system-ui, sans-serif;
   color: var(--ink);
 }
@@ -39,14 +40,10 @@
     --accent-dark: #0ABFAD;
     --shadow-sm:   0 1px 4px rgba(0,0,0,0.25);
     --shadow-md:   0 4px 20px rgba(0,0,0,0.35);
-    --tag-new:       #34D399;
-    --tag-new-bg:    rgba(10,124,110,0.2);
-    --tag-fix:       #FCD34D;
-    --tag-fix-bg:    rgba(180,83,9,0.2);
-    --tag-improved:  #93C5FD;
-    --tag-improved-bg: rgba(29,78,216,0.2);
-    --tag-removed:   #FCA5A5;
-    --tag-removed-bg: rgba(185,28,28,0.2);
+    --bg-new: rgba(13,207,192,0.11);
+    --bg-fix: rgba(96,165,250,0.11);
+    --bg-imp: rgba(167,139,250,0.11);
+    --bg-sec: rgba(248,113,113,0.11);
   }
 }
 :root[data-theme="dark"] {
@@ -60,26 +57,16 @@
   --accent-dark: #0ABFAD;
   --shadow-sm:   0 1px 4px rgba(0,0,0,0.25);
   --shadow-md:   0 4px 20px rgba(0,0,0,0.35);
-  --tag-new:       #34D399;
-  --tag-new-bg:    rgba(10,124,110,0.2);
-  --tag-fix:       #FCD34D;
-  --tag-fix-bg:    rgba(180,83,9,0.2);
-  --tag-improved:  #93C5FD;
-  --tag-improved-bg: rgba(29,78,216,0.2);
-  --tag-removed:   #FCA5A5;
-  --tag-removed-bg: rgba(185,28,28,0.2);
+  --bg-new: rgba(13,207,192,0.11);
+  --bg-fix: rgba(96,165,250,0.11);
+  --bg-imp: rgba(167,139,250,0.11);
+  --bg-sec: rgba(248,113,113,0.11);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--ground);
-  color: var(--ink);
-  font-size: 15px;
-  line-height: 1.6;
-}
+body { margin: 0; background: var(--ground); color: var(--ink); font-size: 15px; line-height: 1.6; }
 
-/* NAV */
+/* ─── NAV ─── */
 nav {
   position: sticky;
   top: env(safe-area-inset-top, 0px);
@@ -93,299 +80,537 @@ nav {
   justify-content: space-between;
   box-shadow: var(--shadow-sm);
 }
-.nav-logo {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--ink);
-  text-decoration: none;
-  letter-spacing: -0.5px;
-}
+.nav-logo { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -0.5px; }
 .nav-logo em { font-style: normal; color: var(--accent); }
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  list-style: none;
-  margin: 0; padding: 0;
-}
-.nav-links a {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: color 0.15s;
-}
+.nav-links { display: flex; align-items: center; gap: 28px; list-style: none; margin: 0; padding: 0; }
+.nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.15s; }
 .nav-links a:hover { color: var(--ink); }
-.btn-nav {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff !important;
-  padding: 8px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  text-decoration: none;
-  transition: background 0.15s;
-}
+.nav-links a.active { color: var(--accent); font-weight: 600; }
+.btn-nav { display: inline-block; background: var(--accent); color: #fff !important; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; text-decoration: none; transition: background 0.15s; }
 .btn-nav:hover { background: var(--accent-dark) !important; }
 
-/* LAYOUT */
-.wrap {
-  max-width: 780px;
-  margin-inline: auto;
-  padding-inline: max(24px, 5vw);
-}
+/* ─── WRAP ─── */
+.wrap { max-width: 1100px; margin-inline: auto; padding-inline: max(24px, 5vw); }
 
-/* PAGE HEADER */
+/* ─── PAGE HEADER ─── */
 .page-header {
-  padding-block: 56px 48px;
+  background: var(--surface);
   border-bottom: 1px solid var(--rule);
+  padding-block: 56px 44px;
+}
+.page-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 14px; display: block;
 }
 .page-header h1 {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(32px, 4vw, 46px);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  margin: 0 0 10px;
-  text-wrap: balance;
-  color: var(--ink);
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 600; letter-spacing: -0.03em; text-wrap: balance;
+  margin: 0 0 12px; color: var(--ink);
 }
-.page-header p {
-  color: var(--muted);
-  font-size: 15.5px;
-  margin: 0;
-}
-.page-header p a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 500;
-}
-.page-header p a:hover { text-decoration: underline; }
+.page-header p { color: var(--muted); font-size: 15px; margin: 0; }
 
-/* RELEASES */
-.releases {
-  padding-block: 40px 80px;
-}
-
-.release {
+/* ─── TWO-COL LAYOUT ─── */
+.cl-layout {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 0 32px;
-  padding-block: 36px;
+  grid-template-columns: 200px 1fr;
+  gap: 0 56px;
+  padding-block: 56px 80px;
+  align-items: start;
+}
+
+/* ─── SIDEBAR ─── */
+.cl-sidebar {
+  position: sticky;
+  top: 80px;
+}
+.sidebar-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px; display: block;
+}
+.version-nav { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.version-nav a {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 7px 10px; border-radius: 6px;
+  font-size: 13px; font-weight: 500; text-decoration: none;
+  color: var(--muted); transition: background 0.12s, color 0.12s;
+}
+.version-nav a:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); color: var(--ink); }
+.version-nav a.latest { color: var(--accent); font-weight: 600; }
+.v-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 600; letter-spacing: 0.06em; padding: 2px 6px;
+  border-radius: 3px; text-transform: uppercase;
+  background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent);
+}
+.sidebar-divider { height: 1px; background: var(--rule); margin-block: 16px; }
+.sidebar-note { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* ─── RELEASE ENTRY ─── */
+.release {
+  padding-bottom: 56px;
+  margin-bottom: 56px;
   border-bottom: 1px solid var(--rule);
 }
-.release:last-child { border-bottom: none; }
+.release:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
 
-.release-meta { padding-top: 3px; }
-
-.release-version {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--accent);
-  display: block;
+.release-header {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
   margin-bottom: 6px;
 }
-
-.release-date {
-  font-size: 12px;
-  color: var(--muted);
-  display: block;
-  white-space: nowrap;
-}
-
-.release-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--rule);
-  margin-top: 14px;
-  display: none; /* shown on desktop via grid line */
-}
-
-.release-body h2 {
+.release-version {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin: 0 0 4px;
-  color: var(--ink);
+  font-size: 26px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink);
 }
-
-.release-summary {
-  font-size: 14px;
-  color: var(--muted);
-  margin: 0 0 18px;
-}
-
-.change-list {
-  list-style: none;
-  margin: 0; padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.change-item {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--ink-mid);
-  line-height: 1.55;
-}
-
 .tag {
-  flex-shrink: 0;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 4px;
   font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em; padding: 3px 8px;
+  border-radius: 4px; text-transform: uppercase;
 }
-.tag-new      { background: var(--tag-new-bg);      color: var(--tag-new); }
-.tag-fix      { background: var(--tag-fix-bg);      color: var(--tag-fix); }
-.tag-improved { background: var(--tag-improved-bg); color: var(--tag-improved); }
-.tag-removed  { background: var(--tag-removed-bg);  color: var(--tag-removed); }
+.tag.latest { background: var(--bg-new); color: var(--c-new); }
+.tag.desktop { background: var(--bg-imp); color: var(--c-imp); }
 
-/* RESPONSIVE */
-@media (max-width: 600px) {
-  .release {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .release-meta {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding-top: 0;
-  }
-  .release-date { margin-bottom: 0; }
+.release-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: var(--muted); letter-spacing: 0.04em;
+  margin-bottom: 28px;
+}
+.release-summary {
+  font-size: 15px; color: var(--ink-mid); line-height: 1.75;
+  max-width: 68ch; margin-bottom: 32px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+}
+
+/* ─── CHANGE GROUPS ─── */
+.change-groups { display: flex; flex-direction: column; gap: 28px; }
+.change-group {}
+.group-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.group-pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  padding: 3px 10px; border-radius: 20px; text-transform: uppercase;
+}
+.group-pill.new { background: var(--bg-new); color: var(--c-new); }
+.group-pill.fix { background: var(--bg-fix); color: var(--c-fix); }
+.group-pill.imp { background: var(--bg-imp); color: var(--c-imp); }
+.group-pill.sec { background: var(--bg-sec); color: var(--c-sec); }
+.group-rule { flex: 1; height: 1px; background: var(--rule); }
+
+.change-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+.change-item {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 0 12px; padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 14px; color: var(--ink-mid); line-height: 1.6;
+  align-items: start;
+}
+.change-item:last-child { border-bottom: none; }
+.change-bullet {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 8px;
+}
+.change-bullet.new { background: var(--c-new); }
+.change-bullet.fix { background: var(--c-fix); }
+.change-bullet.imp { background: var(--c-imp); }
+.change-bullet.sec { background: var(--c-sec); }
+.change-text { display: flex; flex-direction: column; gap: 2px; }
+.change-title { font-weight: 500; color: var(--ink); }
+.change-detail { font-size: 13px; color: var(--muted); }
+
+/* ─── DOWNLOAD LINK ─── */
+.release-dl {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 24px;
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 6px; padding: 9px 16px;
+  font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.release-dl:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.release-dl svg { width: 14px; height: 14px; color: var(--accent); }
+
+/* ─── FOOTER ─── */
+footer { border-top: 1px solid var(--rule); padding-block: 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.foot-logo { font-family: 'Fraunces', Georgia, serif; font-size: 18px; font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -0.3px; }
+.foot-logo em { font-style: normal; color: var(--accent); }
+.foot-copy { font-size: 12.5px; color: var(--muted); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 800px) {
+  .cl-layout { grid-template-columns: 1fr; }
+  .cl-sidebar { position: static; }
   nav .nav-links { display: none; }
 }
 </style>
 
+<!-- ─── NAV ─── -->
 <nav>
   <a href="/" class="nav-logo">DM<em>XI</em></a>
   <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="/changelog.html" style="color:var(--ink)">Changelog</a></li>
+    <li><a href="/#features">Features</a></li>
+    <li><a href="/#how-it-works">How it works</a></li>
+    <li><a href="/#download">Download</a></li>
+    <li><a href="/changelog.html" class="active">Changelog</a></li>
     <li><a href="https://app.dmxiaccounting.com" class="btn-nav">Open App →</a></li>
   </ul>
 </nav>
 
-<div class="wrap">
-  <div class="page-header">
+<!-- ─── PAGE HEADER ─── -->
+<div class="page-header">
+  <div class="wrap">
+    <span class="page-eyebrow">Release History</span>
     <h1>Changelog</h1>
-    <p>Every update to DMXI Accounting, newest first. Open the app at <a href="https://app.dmxiaccounting.com">app.dmxiaccounting.com</a> to get the latest version.</p>
-  </div>
-
-  <div class="releases" id="releases-container">
-    <!-- Releases rendered by JS below -->
+    <p>Every version of DMXI Accounting — what was added, fixed, and improved.</p>
   </div>
 </div>
 
-<script>
-// ─────────────────────────────────────────────────────────────────────────────
-// RELEASES — edit this array to add a new release, then run: wrangler deploy
-// ─────────────────────────────────────────────────────────────────────────────
-const RELEASES = [
-  {
-    version: "v1.4.0",
-    date: "16 Sep 2026",
-    title: "Attachments & Clearer Buttons",
-    summary: "Attach receipts or reference images to purchases, income, and expenses. Buttons across the app now show labels instead of bare icons.",
-    changes: [
-      { type: "new",      text: "Attach photos and PDFs to Purchase entries for reference" },
-      { type: "new",      text: "Attach photos and PDFs to Income (Invoice) entries" },
-      { type: "new",      text: "Attach photos and PDFs to Expense entries" },
-      { type: "improved", text: "Recurring and Attachment row buttons now show SVG icon + text label" },
-      { type: "improved", text: "Statement page redesigned with T-account DR/CR columns, KPI cards, and running balance" },
-      { type: "fix",      text: "All Excel and PDF exports now use company name instead of 'DMXI'" },
-    ]
-  },
-  {
-    version: "v1.3.0",
-    date: "10 Sep 2026",
-    title: "Remote Access via Cloudflare Tunnel",
-    summary: "DMXI can now be reached from mobile and any device over the internet at a permanent URL.",
-    changes: [
-      { type: "new",      text: "Permanent public URL at app.dmxiaccounting.com via Cloudflare Tunnel" },
-      { type: "new",      text: "Mobile-accessible: open the app from your phone over WiFi or cellular" },
-      { type: "improved", text: "Vite dev server now binds to 0.0.0.0 for LAN access" },
-      { type: "improved", text: "PM2 manages tunnel process with auto-restart on crash" },
-    ]
-  },
-  {
-    version: "v1.2.0",
-    date: "2 Sep 2026",
-    title: "Reports & Ledger Improvements",
-    summary: "Daybook, account ledger, and chart of accounts exports now carry the company name on every page.",
-    changes: [
-      { type: "improved", text: "Daybook export includes company name in header" },
-      { type: "improved", text: "Account ledger PDF and Excel branded with company name" },
-      { type: "improved", text: "Chart of Accounts export includes company name" },
-      { type: "improved", text: "Stock Report export now uses company name" },
-      { type: "fix",      text: "Trial Balance totals now round correctly on large datasets" },
-    ]
-  },
-  {
-    version: "v1.1.0",
-    date: "20 Aug 2026",
-    title: "Multi-Company & Stock Management",
-    summary: "Switch between multiple companies without logging out. Stock module added with SKU tracking and valuation reports.",
-    changes: [
-      { type: "new",      text: "Multi-company support — create and switch companies from the top bar" },
-      { type: "new",      text: "Stock management module with SKU-level tracking" },
-      { type: "new",      text: "Stock valuation report with cost of goods sold" },
-      { type: "improved", text: "Company name shown in all report headers" },
-      { type: "fix",      text: "Invoice payment status updates correctly after partial payments" },
-    ]
-  },
-  {
-    version: "v1.0.0",
-    date: "1 Aug 2026",
-    title: "Initial Release",
-    summary: "First release of DMXI Accounting — double-entry ledger, invoicing, purchases, and expenses.",
-    changes: [
-      { type: "new", text: "Double-entry general ledger with chart of accounts" },
-      { type: "new", text: "Invoice creation with payment tracking" },
-      { type: "new", text: "Purchase management with supplier tracking" },
-      { type: "new", text: "Expense logging with recurring entries" },
-      { type: "new", text: "Financial reports: Trial Balance, P&L, Balance Sheet" },
-      { type: "new", text: "Export to Excel and PDF for all reports" },
-    ]
-  }
-];
-// ─────────────────────────────────────────────────────────────────────────────
+<!-- ─── BODY ─── -->
+<div class="wrap">
+  <div class="cl-layout">
 
-const TAG_LABELS = { new: "New", fix: "Fix", improved: "Improved", removed: "Removed" };
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="cl-sidebar">
+      <span class="sidebar-label">Versions</span>
+      <ul class="version-nav">
+        <li>
+          <a href="#v1-0" class="latest">
+            v1.0
+            <span class="v-badge">Latest</span>
+          </a>
+        </li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <p class="sidebar-note">New releases are added here as soon as they ship.</p>
+    </aside>
 
-function render() {
-  const container = document.getElementById("releases-container");
-  container.innerHTML = RELEASES.map(r => `
-    <div class="release">
-      <div class="release-meta">
-        <span class="release-version">${r.version}</span>
-        <span class="release-date">${r.date}</span>
-      </div>
-      <div class="release-body">
-        <h2>${r.title}</h2>
-        <p class="release-summary">${r.summary}</p>
-        <ul class="change-list">
-          ${r.changes.map(c => `
-            <li class="change-item">
-              <span class="tag tag-${c.type}">${TAG_LABELS[c.type] || c.type}</span>
-              <span>${c.text}</span>
-            </li>
-          `).join("")}
-        </ul>
-      </div>
-    </div>
-  `).join("");
-}
+    <!-- ─── RELEASES ─── -->
+    <div class="cl-releases">
 
-render();
-</script>
+      <!-- ════════════════════════════════════════
+           v1.0  —  September 2026
+      ════════════════════════════════════════ -->
+      <div class="release" id="v1-0">
+        <div class="release-header">
+          <span class="release-version">Version 1.0</span>
+          <span class="tag latest">Latest</span>
+          <span class="tag desktop">Desktop</span>
+        </div>
+        <div class="release-meta">Released September 2026 &nbsp;·&nbsp; Initial public release</div>
+
+        <div class="release-summary">
+          The first public release of DMXI Accounting. Includes the full cloud web app at
+          <strong>app.dmxiaccounting.com</strong> plus a self-contained Windows desktop app
+          (DMXI.exe) that runs entirely on your own computer — no internet, no monthly fees,
+          no PostgreSQL required.
+        </div>
+
+        <div class="change-groups">
+
+          <!-- INVOICING & BILLING -->
+          <div class="change-group">
+            <div class="group-header">
+              <span class="group-pill new">Invoicing &amp; Billing</span>
+              <span class="group-rule"></span>
+            </div>
+            <ul class="change-list">
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Invoice creation with auto-numbering</span>
+                  <span class="change-detail">Sequential invoice numbers (INV-0001, INV-0002…) generated automatically per company.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Full &amp; partial payment recording</span>
+                  <span class="change-detail">Record one or many payments against an invoice; outstanding balance updates in real time.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Shareable invoice links</span>
+                  <span class="change-detail">Generate a public URL to send to clients — they see a clean invoice view without needing an account.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Credit notes</span>
+                  <span class="change-detail">Issue credit notes linked to original invoices with automatic ledger reversal entries.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Quotations module</span>
+                  <span class="change-detail">Create numbered quotes with validity dates; convert to invoice in one click when accepted.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">VAT &amp; discount on line items</span>
+                  <span class="change-detail">Apply percentage VAT and discount per invoice; totals calculated automatically.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- EXPENSES & PURCHASES -->
+          <div class="change-group">
+            <div class="group-header">
+              <span class="group-pill new">Expenses &amp; Purchases</span>
+              <span class="group-rule"></span>
+            </div>
+            <ul class="change-list">
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Expense tracking with category codes</span>
+                  <span class="change-detail">Log operating costs by account category; filter by vendor, date, or status.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Purchase orders with multi-item lines</span>
+                  <span class="change-detail">Record supplier bills with voucher numbers (PUR-0001…), multiple product lines, and VAT.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">File attachments</span>
+                  <span class="change-detail">Attach scanned receipts or bills to any expense, purchase, or invoice for a full paperless audit trail.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Vendor management</span>
+                  <span class="change-detail">Maintain a vendor list with contact details; link all purchases and expenses per supplier.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ACCOUNTING & LEDGER -->
+          <div class="change-group">
+            <div class="group-header">
+              <span class="group-pill new">Accounting &amp; Ledger</span>
+              <span class="group-rule"></span>
+            </div>
+            <ul class="change-list">
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Double-entry general ledger</span>
+                  <span class="change-detail">Every transaction posts balanced DR and CR journal entries automatically. Debit = Credit enforced at all times.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Chart of accounts with pre-seeded codes</span>
+                  <span class="change-detail">Standard account codes loaded on company creation (Assets, Liabilities, Equity, Revenue, Expenses).</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Manual journal entries</span>
+                  <span class="change-detail">Post custom DR/CR entries with memo and reference for adjustments, accruals, or corrections.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Account statements &amp; daybook</span>
+                  <span class="change-detail">View full transaction history per account or across all accounts for any date range.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- FINANCIAL REPORTS -->
+          <div class="change-group">
+            <div class="group-header">
+              <span class="group-pill new">Financial Reports</span>
+              <span class="group-rule"></span>
+            </div>
+            <ul class="change-list">
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Trial Balance</span>
+                  <span class="change-detail">All account DR/CR totals side by side; proves double-entry integrity (Σ DR = Σ CR).</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Profit &amp; Loss statement</span>
+                  <span class="change-detail">Revenue vs. expenses for any date range; monthly breakdown chart included.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Balance Sheet</span>
+                  <span class="change-detail">Assets, liabilities, equity, and retained earnings as of any date — always balanced.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Cash Flow report</span>
+                  <span class="change-detail">Net change in cash accounts over a period, broken down by counter-account category.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Excel &amp; PDF export</span>
+                  <span class="change-detail">Every report exports with your company name and logo — ready to hand to your accountant or auditor.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- STOCK MANAGEMENT -->
+          <div class="change-group">
+            <div class="group-header">
+              <span class="group-pill new">Stock Management</span>
+              <span class="group-rule"></span>
+            </div>
+            <ul class="change-list">
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Product catalogue with SKUs &amp; brands</span>
+                  <span class="change-detail">Manage products with unit price, unit of measure, reorder levels, and brand grouping.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Stock count history</span>
+                  <span class="change-detail">Record physical stock counts; system auto-calculates variance against expected quantities.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Stock movement via purchases</span>
+                  <span class="change-detail">Receiving goods on a purchase order automatically updates product stock quantities.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- USERS & COMPANIES -->
+          <div class="change-group">
+            <div class="group-header">
+              <span class="group-pill new">Users &amp; Companies</span>
+              <span class="group-rule"></span>
+            </div>
+            <ul class="change-list">
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Multi-company support</span>
+                  <span class="change-detail">One account can manage unlimited companies; switch between them from the dashboard.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Role-based access control</span>
+                  <span class="change-detail">Four roles per company: Owner, Admin, Accountant, Viewer — each with distinct permissions.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Audit log</span>
+                  <span class="change-detail">Every create, update, delete, and cancel action is recorded with the user, timestamp, and changed values.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet new"></span>
+                <div class="change-text">
+                  <span class="change-title">Branch sync</span>
+                  <span class="change-detail">Export a branch company's data as a .dmxi bundle and import it into a head-office company — customers, invoices, payments, and expenses all merged.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- DESKTOP APP -->
+          <div class="change-group">
+            <div class="group-header">
+              <span class="group-pill imp">Desktop App — Windows</span>
+              <span class="group-rule"></span>
+            </div>
+            <ul class="change-list">
+              <li class="change-item">
+                <span class="change-bullet imp"></span>
+                <div class="change-text">
+                  <span class="change-title">DMXI.exe — single-file Windows app</span>
+                  <span class="change-detail">Download and run — no Node.js, no PostgreSQL, no installation wizard. Everything bundled in one executable.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet imp"></span>
+                <div class="change-text">
+                  <span class="change-title">SQLite database — data stays on your PC</span>
+                  <span class="change-detail">All data written to a dmxi.db file beside the exe. No cloud, no subscription, no data leaving your computer.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet imp"></span>
+                <div class="change-text">
+                  <span class="change-title">Auto-opens browser on launch</span>
+                  <span class="change-detail">Double-click DMXI.exe and your browser opens to http://localhost:4000 automatically after 1.5 seconds.</span>
+                </div>
+              </li>
+              <li class="change-item">
+                <span class="change-bullet imp"></span>
+                <div class="change-text">
+                  <span class="change-title">Works completely offline</span>
+                  <span class="change-detail">No internet connection required after download. Full functionality available offline.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+        </div><!-- /change-groups -->
+
+        <a href="https://github.com/meetbhudiya/dmxi-accounting/releases/tag/v1.0"
+           class="release-dl" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download v1.0 for Windows
+        </a>
+
+      </div><!-- /release v1.0 -->
+
+    </div><!-- /cl-releases -->
+  </div><!-- /cl-layout -->
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer class="wrap">
+  <a href="/" class="foot-logo">DM<em>XI</em> Accounting</a>
+  <span class="foot-copy">© 2026 DMXI · Built for growing businesses</span>
+</footer>

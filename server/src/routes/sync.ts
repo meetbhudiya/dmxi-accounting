@@ -51,7 +51,7 @@ syncRouter.post("/import", requireCompanyMember("ACCOUNTANT"), async (req: Compa
   // ── Customers ──────────────────────────────────────────────────────────
   for (const c of data.customers ?? []) {
     const match = await prisma.customer.findFirst({
-      where: { companyId, name: { equals: c.name, mode: "insensitive" } },
+      where: { companyId, name: c.name },
     });
     if (match) {
       customerMap[c.id] = match.id;
@@ -68,7 +68,7 @@ syncRouter.post("/import", requireCompanyMember("ACCOUNTANT"), async (req: Compa
   // ── Vendors ────────────────────────────────────────────────────────────
   for (const v of data.vendors ?? []) {
     const match = await prisma.vendor.findFirst({
-      where: { companyId, name: { equals: v.name, mode: "insensitive" } },
+      where: { companyId, name: v.name },
     });
     if (match) {
       vendorMap[v.id] = match.id;
@@ -85,7 +85,7 @@ syncRouter.post("/import", requireCompanyMember("ACCOUNTANT"), async (req: Compa
   // ── Products ───────────────────────────────────────────────────────────
   for (const p of data.products ?? []) {
     const match = await prisma.product.findFirst({
-      where: { companyId, name: { equals: p.name, mode: "insensitive" } },
+      where: { companyId, name: p.name },
     });
     if (match) {
       productMap[p.id] = match.id;

@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 
 export interface AuditParams {
@@ -18,7 +17,7 @@ export async function logAudit(params: AuditParams): Promise<void> {
     await prisma.auditLog.create({
       data: {
         ...rest,
-        changes: changes as Prisma.InputJsonValue | undefined,
+        changes: changes !== undefined ? JSON.stringify(changes) : undefined,
       },
     });
   } catch {

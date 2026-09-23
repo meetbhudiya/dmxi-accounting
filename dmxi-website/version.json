@@ -1,5 +1,8 @@
 {
-  "version": "v1.4.0",
-  "message": "Attachments on purchases & invoices, shareable invoice links, public status page.",
-  "changelogUrl": "https://dmxiaccounting.com/changelog.html"
+  "latest": "1.0",
+  "releaseDate": "2026-09-24",
+  "gracePeriodDays": 30,
+  "downloadUrl": "https://github.com/meetbhudiya/dmxi-accounting/releases/latest/download/DMXI.exe",
+  "changelogUrl": "https://dmxiaccounting.com/changelog.html",
+  "message": "Initial desktop release."
 }

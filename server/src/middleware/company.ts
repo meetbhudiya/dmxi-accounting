@@ -1,7 +1,8 @@
 import { Response, NextFunction } from "express";
-import { CompanyRole } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { AuthedRequest } from "./auth";
+
+type CompanyRole = "VIEWER" | "ACCOUNTANT" | "ADMIN" | "OWNER";
 
 export interface CompanyScopedRequest extends AuthedRequest {
   companyId?: string;
@@ -15,10 +16,6 @@ const ROLE_RANK: Record<CompanyRole, number> = {
   OWNER: 3,
 };
 
-/**
- * Resolves :companyId from the route, ensures the authenticated user is a
- * member of that company, and attaches companyId/companyRole to the request.
- */
 export function requireCompanyMember(minRole: CompanyRole = "VIEWER") {
   return async (req: CompanyScopedRequest, res: Response, next: NextFunction) => {
     try {
@@ -35,12 +32,13 @@ export function requireCompanyMember(minRole: CompanyRole = "VIEWER") {
         return res.status(403).json({ error: "You do not have access to this company" });
       }
 
-      if (ROLE_RANK[membership.role] < ROLE_RANK[minRole]) {
+      const memberRole = membership.role as CompanyRole;
+      if (ROLE_RANK[memberRole] < ROLE_RANK[minRole]) {
         return res.status(403).json({ error: "Insufficient permissions for this action" });
       }
 
       req.companyId = companyId;
-      req.companyRole = membership.role;
+      req.companyRole = memberRole;
       next();
     } catch (err) {
       next(err);

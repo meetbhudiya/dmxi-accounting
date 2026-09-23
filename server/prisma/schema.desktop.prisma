@@ -1,0 +1,431 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Multi-tenancy & Users ----------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships CompanyMember[]
+}
+
+model Company {
+  id              String   @id @default(uuid())
+  name            String
+  invoiceSeq      Int      @default(0)
+  expenseSeq      Int      @default(0)
+  purchaseSeq     Int      @default(0)
+  creditNoteSeq   Int      @default(0)
+  quotationSeq    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  members         CompanyMember[]
+  accounts        Account[]
+  journalEntries  JournalEntry[]
+  customers       Customer[]
+  vendors         Vendor[]
+  brands          Brand[]
+  invoices        Invoice[]
+  expenses        Expense[]
+  products        Product[]
+  purchases       Purchase[]
+  creditNotes     CreditNote[]
+  auditLogs       AuditLog[]
+  attachments     Attachment[]
+  stockCounts     StockCount[]
+  syncConfig      SyncConfig?
+  quotations      Quotation[]
+}
+
+// ---------- Brands ----------
+
+model Brand {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  createdAt DateTime @default(now())
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([companyId, name])
+}
+
+model Product {
+  id           String   @id @default(uuid())
+  companyId    String
+  name         String
+  sku          String?
+  description  String?
+  brandId      String?
+  unitPrice    Decimal  @default(0)
+  unit         String?
+  isActive     Boolean  @default(true)
+  stockQty     Decimal  @default(0)
+  reorderLevel Decimal  @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  brand         Brand?         @relation(fields: [brandId], references: [id])
+  purchaseItems PurchaseItem[]
+
+  @@unique([companyId, brandId, name])
+}
+
+model CompanyMember {
+  id        String   @id @default(uuid())
+  companyId String
+  userId    String
+  role      String   @default("VIEWER")
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+}
+
+// ---------- Chart of Accounts & General Ledger ----------
+
+model Account {
+  id        String   @id @default(uuid())
+  companyId String
+  code      String
+  name      String
+  type      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  journalLines JournalLine[]
+
+  @@unique([companyId, code])
+}
+
+model JournalEntry {
+  id          String   @id @default(uuid())
+  companyId   String
+  date        DateTime
+  memo        String?
+  reference   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lines   JournalLine[]
+}
+
+model JournalLine {
+  id             String  @id @default(uuid())
+  journalEntryId String
+  accountId      String
+  debit          Decimal @default(0)
+  credit         Decimal @default(0)
+  description    String?
+
+  journalEntry JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  account      Account      @relation(fields: [accountId], references: [id])
+}
+
+// ---------- Quotations ----------
+
+model Quotation {
+  id         String   @id @default(uuid())
+  companyId  String
+  number     String
+  customer   String
+  issueDate  DateTime
+  validUntil DateTime
+  status     String   @default("DRAFT")
+  notes      String?
+  vatPercent Decimal  @default(0)
+  subtotal   Decimal  @default(0)
+  vatAmount  Decimal  @default(0)
+  total      Decimal  @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  company Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  items   QuotationItem[]
+
+  @@unique([companyId, number])
+}
+
+model QuotationItem {
+  id          String  @id @default(uuid())
+  quotationId String
+  description String
+  qty         Decimal @default(1)
+  unitPrice   Decimal @default(0)
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Invoicing & Billing ----------
+
+model Customer {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  kraPin    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoices Invoice[]
+}
+
+model Invoice {
+  id              String   @id @default(uuid())
+  companyId       String
+  customerId      String
+  number          String
+  status          String   @default("DRAFT")
+  issueDate       DateTime
+  dueDate         DateTime
+  notes           String?
+  discountPercent Decimal  @default(0)
+  vatPercent      Decimal  @default(0)
+  reference       String?
+  externalId      String?
+  shareToken      String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer    Customer     @relation(fields: [customerId], references: [id])
+  items       InvoiceItem[]
+  payments    Payment[]
+  creditNotes CreditNote[]
+  attachments Attachment[]
+
+  @@unique([companyId, number])
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  invoiceId   String
+  product     String?
+  description String
+  quantity    Decimal @default(1)
+  unitPrice   Decimal @default(0)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id         String    @id @default(uuid())
+  invoiceId  String
+  amount     Decimal
+  date       DateTime
+  method     String?
+  notes      String?
+  isVoided   Boolean   @default(false)
+  voidedAt   DateTime?
+  voidNote   String?
+  externalId String?
+  createdAt  DateTime  @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Expenses & Vendor Management ----------
+
+model Vendor {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses  Expense[]
+  purchases Purchase[]
+}
+
+model Expense {
+  id           String    @id @default(uuid())
+  companyId    String
+  vendorId     String?
+  category     String
+  description  String?
+  amount       Decimal
+  date         DateTime
+  status       String    @default("UNPAID")
+  voucherNo    String?
+  reference    String?
+  cancelledAt  DateTime?
+  cancelReason String?
+  externalId   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vendor      Vendor?      @relation(fields: [vendorId], references: [id])
+  attachments Attachment[]
+}
+
+// ---------- Purchases ----------
+
+model Purchase {
+  id           String    @id @default(uuid())
+  companyId    String
+  vendorId     String?
+  date         DateTime
+  status       String    @default("UNPAID")
+  voucherNo    String?
+  reference    String?
+  vatPercent   Decimal   @default(0)
+  cancelledAt  DateTime?
+  cancelReason String?
+  externalId   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vendor      Vendor?        @relation(fields: [vendorId], references: [id])
+  items       PurchaseItem[]
+  attachments Attachment[]
+}
+
+model PurchaseItem {
+  id          String  @id @default(uuid())
+  purchaseId  String
+  productId   String?
+  description String?
+  quantity    Decimal @default(1)
+  unitCost    Decimal @default(0)
+
+  purchase Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product  Product?  @relation(fields: [productId], references: [id])
+}
+
+// ---------- Credit Notes ----------
+
+model CreditNote {
+  id        String   @id @default(uuid())
+  companyId String
+  invoiceId String
+  number    String
+  amount    Decimal
+  date      DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, number])
+}
+
+// ---------- Stock Count History ----------
+
+model StockCount {
+  id        String   @id @default(uuid())
+  companyId String
+  countDate DateTime
+  note      String?
+  createdBy String
+  createdAt DateTime @default(now())
+
+  company Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  items   StockCountItem[]
+
+  @@index([companyId, createdAt(sort: Desc)])
+}
+
+model StockCountItem {
+  id           String  @id @default(uuid())
+  stockCountId String
+  productId    String
+  productName  String
+  brand        String?
+  unit         String?
+  systemQty    Decimal
+  countedQty   Decimal
+  variance     Decimal
+  unitPrice    Decimal
+
+  stockCount StockCount @relation(fields: [stockCountId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Audit Log ----------
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  companyId String
+  userId    String
+  userEmail String
+  action    String
+  entity    String
+  entityId  String
+  entityRef String?
+  changes   String?
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt(sort: Desc)])
+  @@index([companyId, entity])
+}
+
+// ---------- Auto Sync Config ----------
+
+model SyncConfig {
+  id              String    @id @default(uuid())
+  companyId       String    @unique
+  hqUrl           String
+  hqCompanyId     String
+  hqEmail         String
+  hqPassword      String
+  intervalMinutes Int       @default(60)
+  enabled         Boolean   @default(false)
+  lastSyncAt      DateTime?
+  lastSyncStatus  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Attachments ----------
+
+model Attachment {
+  id         String   @id @default(uuid())
+  companyId  String
+  expenseId  String?
+  purchaseId String?
+  invoiceId  String?
+  filename   String
+  storedAs   String
+  mimeType   String
+  sizeBytes  Int
+  shareToken String?  @unique
+  createdAt  DateTime @default(now())
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expense  Expense?  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  purchase Purchase? @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  invoice  Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}

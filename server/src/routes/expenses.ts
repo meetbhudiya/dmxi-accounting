@@ -31,7 +31,7 @@ expensesRouter.post("/vendors", requireCompanyMember("ACCOUNTANT"), async (req: 
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const duplicate = await prisma.vendor.findFirst({
-    where: { companyId: req.companyId!, name: { equals: parsed.data.name, mode: "insensitive" } },
+    where: { companyId: req.companyId!, name: parsed.data.name },
   });
   if (duplicate) return res.status(409).json({ error: `A vendor named "${duplicate.name}" already exists.` });
 
