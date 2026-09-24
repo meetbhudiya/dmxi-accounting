@@ -7,7 +7,9 @@ import { authRouter } from "./routes/auth";
 import { companiesRouter } from "./routes/companies";
 import { companyScopedRouter } from "./routes/company-scoped";
 import { publicRouter } from "./routes/public";
+import { backupRouter } from "./routes/backup";
 import { startAutoSync } from "./lib/autoSync";
+import { scheduleBackups } from "./lib/backup";
 
 const app = express();
 
@@ -134,6 +136,7 @@ app.get("/api/update-status", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/companies", companiesRouter);
 app.use("/api/companies/:companyId", companyScopedRouter);
+app.use("/api/backups", backupRouter);
 app.use("/api", publicRouter);
 
 // Serve the React client in production (when client/dist exists beside the server)
@@ -162,4 +165,5 @@ const port = Number(process.env.PORT) || 4000;
 app.listen(port, () => {
   console.log(`DMXI server listening on http://localhost:${port}`);
   startAutoSync().catch(console.error);
+  scheduleBackups();
 });

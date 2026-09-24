@@ -78,7 +78,7 @@ function Toast({ msg }: { msg: { type: "ok" | "err"; text: string } | null }) {
 
 // ── Nav tab config ────────────────────────────────────────────────────────────
 
-type Tab = "profile" | "company" | "appearance" | "features" | "sync";
+type Tab = "profile" | "company" | "appearance" | "features" | "sync" | "backups";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "profile",    label: "Profile",    icon: <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx={12} cy={8} r={4}/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
@@ -86,6 +86,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "appearance", label: "Appearance", icon: <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx={12} cy={12} r={3}/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> },
   { id: "features",   label: "Features",   icon: <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
   { id: "sync",       label: "Branch Sync",icon: <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg> },
+  { id: "backups",    label: "Backups",    icon: <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> },
 ];
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -332,6 +333,68 @@ export default function SettingsPage() {
     } catch (err) {
       setAutoMsg({ type: "err", text: err instanceof ApiError ? err.message : "Sync failed." });
     } finally { setAutoTriggering(false); }
+  }
+
+  // ── Backup state ────────────────────────────────────────────────────────────
+  const isDesktop = window.location.hostname === "localhost";
+  const [backups,          setBackups]          = useState<any[]>([]);
+  const [backupsLoading,   setBackupsLoading]   = useState(false);
+  const [backingUp,        setBackingUp]        = useState(false);
+  const [backupMsg,        setBackupMsg]        = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [confirmRestore,   setConfirmRestore]   = useState<string | null>(null);
+  const [confirmDelete,    setConfirmDelete]    = useState<string | null>(null);
+  const [restoring,        setRestoring]        = useState(false);
+
+  useEffect(() => {
+    if (tab !== "backups" || !isDesktop) return;
+    setBackupsLoading(true);
+    fetch("/api/backups", { headers: { Authorization: `Bearer ${localStorage.getItem("dmxi_token")}` } })
+      .then(r => r.json()).then(setBackups).catch(() => setBackups([]))
+      .finally(() => setBackupsLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  async function handleBackupNow() {
+    setBackingUp(true); setBackupMsg(null);
+    try {
+      const r = await fetch("/api/backups/now", { method: "POST", headers: { Authorization: `Bearer ${localStorage.getItem("dmxi_token")}` } });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error);
+      setBackups((prev) => [data, ...prev]);
+      setBackupMsg({ type: "ok", text: `Backup created: ${data.filename}` });
+    } catch (err: any) { setBackupMsg({ type: "err", text: err.message ?? "Backup failed." }); }
+    finally { setBackingUp(false); }
+  }
+
+  async function handleDelete(filename: string) {
+    try {
+      const r = await fetch(`/api/backups/${encodeURIComponent(filename)}`, { method: "DELETE", headers: { Authorization: `Bearer ${localStorage.getItem("dmxi_token")}` } });
+      if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+      setBackups((prev) => prev.filter((b) => b.filename !== filename));
+      setBackupMsg({ type: "ok", text: `Deleted ${filename}` });
+    } catch (err: any) { setBackupMsg({ type: "err", text: err.message ?? "Delete failed." }); }
+    finally { setConfirmDelete(null); }
+  }
+
+  async function handleRestore(filename: string) {
+    setRestoring(true); setBackupMsg(null);
+    try {
+      const r = await fetch(`/api/backups/${encodeURIComponent(filename)}/restore`, { method: "POST", headers: { Authorization: `Bearer ${localStorage.getItem("dmxi_token")}` } });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error);
+      setBackupMsg({ type: "ok", text: data.message });
+    } catch (err: any) { setBackupMsg({ type: "err", text: err.message ?? "Restore failed." }); }
+    finally { setRestoring(false); setConfirmRestore(null); }
+  }
+
+  function handleOpenFolder() {
+    fetch("/api/backups/open-folder", { method: "POST", headers: { Authorization: `Bearer ${localStorage.getItem("dmxi_token")}` } }).catch(() => {});
+  }
+
+  function fmtBytes(b: number) {
+    if (b < 1024) return `${b} B`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    return `${(b / (1024 * 1024)).toFixed(2)} MB`;
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -1077,6 +1140,117 @@ export default function SettingsPage() {
                 </div>
               )}
             </>
+          )}
+
+          {tab === "backups" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <SectionHeader
+                icon={<svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>}
+                title="Backups"
+                sub="Daily automatic backups of your database. Only Admins and Owners can delete or restore."
+              />
+
+              {!isDesktop && (
+                <div style={{ padding: "16px 18px", borderRadius: 10, background: "var(--bg)", border: "1px solid var(--border)", fontSize: 13, color: "var(--muted)" }}>
+                  Backups are only available in the desktop app (DMXI.exe).
+                </div>
+              )}
+
+              {isDesktop && (
+                <>
+                  {/* Actions row */}
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                    <button className="btn btn-primary" onClick={handleBackupNow} disabled={backingUp} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                      <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      {backingUp ? "Backing up…" : "Backup Now"}
+                    </button>
+                    <button className="btn" onClick={handleOpenFolder} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                      <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                      Open Folder
+                    </button>
+                    <span style={{ fontSize: 12, color: "var(--muted)" }}>Auto-backup runs every night at midnight</span>
+                  </div>
+
+                  {backupMsg && (
+                    <div style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 500,
+                      background: backupMsg.type === "ok" ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)",
+                      color: backupMsg.type === "ok" ? "#16a34a" : "#dc2626",
+                      border: `1px solid ${backupMsg.type === "ok" ? "rgba(22,163,74,0.2)" : "rgba(220,38,38,0.2)"}`,
+                    }}>{backupMsg.text}</div>
+                  )}
+
+                  {/* Backup list */}
+                  <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, overflow: "hidden" }}>
+                    <div style={{ padding: "12px 18px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>
+                        {backupsLoading ? "Loading…" : `${backups.length} backup${backups.length !== 1 ? "s" : ""}`}
+                      </span>
+                    </div>
+
+                    {!backupsLoading && backups.length === 0 && (
+                      <div style={{ padding: "32px 18px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>
+                        No backups yet. Click <strong>Backup Now</strong> to create the first one.
+                      </div>
+                    )}
+
+                    {backups.map((b) => (
+                      <div key={b.filename} style={{
+                        display: "flex", alignItems: "center", gap: 14, padding: "12px 18px",
+                        borderBottom: "1px solid var(--border)", flexWrap: "wrap",
+                      }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                          background: b.isToday ? "rgba(36,84,255,0.1)" : "var(--bg)",
+                          border: `1px solid ${b.isToday ? "rgba(36,84,255,0.25)" : "var(--border)"}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={b.isToday ? "var(--primary,#2454ff)" : "var(--muted)"} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                          </svg>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", display: "flex", alignItems: "center", gap: 7 }}>
+                            {b.date}
+                            {b.isToday && <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 4, background: "rgba(36,84,255,0.1)", color: "var(--primary,#2454ff)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Today</span>}
+                          </div>
+                          <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 1 }}>{b.filename} · {fmtBytes(b.sizeBytes)}</div>
+                        </div>
+                        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                          {confirmRestore === b.filename ? (
+                            <>
+                              <span style={{ fontSize: 12, color: "var(--muted)", alignSelf: "center" }}>This will overwrite current data.</span>
+                              <button className="btn" style={{ color: "#dc2626", borderColor: "#fecaca", fontSize: 12, padding: "5px 12px" }} disabled={restoring}
+                                onClick={() => handleRestore(b.filename)}>
+                                {restoring ? "Restoring…" : "Confirm Restore"}
+                              </button>
+                              <button className="btn" style={{ fontSize: 12, padding: "5px 12px" }} onClick={() => setConfirmRestore(null)}>Cancel</button>
+                            </>
+                          ) : confirmDelete === b.filename ? (
+                            <>
+                              <span style={{ fontSize: 12, color: "var(--muted)", alignSelf: "center" }}>Delete permanently?</span>
+                              <button className="btn" style={{ color: "#dc2626", borderColor: "#fecaca", fontSize: 12, padding: "5px 12px" }}
+                                onClick={() => handleDelete(b.filename)}>
+                                Yes, Delete
+                              </button>
+                              <button className="btn" style={{ fontSize: 12, padding: "5px 12px" }} onClick={() => setConfirmDelete(null)}>Cancel</button>
+                            </>
+                          ) : (
+                            <>
+                              <button className="btn" style={{ fontSize: 12, padding: "5px 12px" }} onClick={() => setConfirmRestore(b.filename)}>Restore</button>
+                              <button className="btn" style={{ color: "#dc2626", borderColor: "#fecaca", fontSize: 12, padding: "5px 12px" }} onClick={() => setConfirmDelete(b.filename)}>Delete</button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--bg)", border: "1px solid var(--border)", fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
+                    <strong style={{ color: "var(--text)" }}>Note:</strong> Backups are stored in the <code style={{ background: "var(--border)", padding: "1px 5px", borderRadius: 3 }}>backups/</code> folder beside DMXI.exe.
+                    Only Admins and Owners can delete or restore backups. Restore replaces the current database — restart DMXI after restoring.
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
         </div>
