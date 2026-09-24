@@ -8,6 +8,7 @@ import { companiesRouter } from "./routes/companies";
 import { companyScopedRouter } from "./routes/company-scoped";
 import { publicRouter } from "./routes/public";
 import { backupRouter } from "./routes/backup";
+import { branchExportRouter } from "./routes/branch-export";
 import { startAutoSync } from "./lib/autoSync";
 import { scheduleBackups } from "./lib/backup";
 
@@ -137,6 +138,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/companies", companiesRouter);
 app.use("/api/companies/:companyId", companyScopedRouter);
 app.use("/api/backups", backupRouter);
+app.use("/api", branchExportRouter);
 app.use("/api", publicRouter);
 
 // Serve the React client in production (when client/dist exists beside the server)

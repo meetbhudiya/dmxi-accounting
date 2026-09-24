@@ -55,6 +55,7 @@ model Company {
   stockCounts     StockCount[]
   syncConfig      SyncConfig?
   quotations      Quotation[]
+  branches        Branch[]
 }
 
 // ---------- Brands ----------
@@ -445,6 +446,21 @@ model SyncConfig {
   updatedAt       DateTime  @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Branch Sync ----------
+
+model Branch {
+  id           String    @id @default(uuid())
+  companyId    String
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name         String
+  url          String
+  secretKey    String
+  lastSyncAt   DateTime?
+  lastSnapshot String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 // ---------- Attachments ----------

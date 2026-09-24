@@ -12,6 +12,7 @@ import { ShortcutsContext } from "../contexts/ShortcutsContext";
 // ── SVG icon paths (Heroicons outline) ───────────────────────────────────────
 
 const ICON_PATHS: Record<string, string> = {
+  branches:       "M5 12H3m16 0h-2M12 5v2m0 10v2M6.34 7.34l-1.41-1.41m12.14 12.14l-1.41-1.41M6.34 16.66l-1.41 1.41M18.07 5.93l-1.41 1.41M12 8a4 4 0 100 8 4 4 0 000-8z",
   dashboard:      "M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z",
   invoices:       "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
   quotations:     "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
@@ -87,6 +88,7 @@ function buildGroups(features: ReturnType<typeof getFeatures>): NavGroup[] {
       label: "System",
       items: [
         { to: "/settings", label: "Settings",    icon: "settings", gKey: "S" },
+        { to: "/branches", label: "Branches",    icon: "branches" },
         { to: "/audit",    label: "Audit Trail", icon: "audit" },
         ...(features.pos ? [{ to: "/pos", label: "POS", icon: "pos", soon: true }] : []),
       ],

@@ -10,6 +10,7 @@ import { syncRouter } from "./sync";
 import { auditRouter } from "./audit";
 import { attachmentsRouter } from "./attachments";
 import { quotationsRouter } from "./quotations";
+import { branchesRouter } from "./branches";
 
 // Mounted at /api/companies/:companyId — combines all per-company resource routers
 export const companyScopedRouter = Router({ mergeParams: true });
@@ -25,3 +26,4 @@ companyScopedRouter.use("/reports", reportsRouter);
 companyScopedRouter.use("/sync", syncRouter);
 companyScopedRouter.use(auditRouter);
 companyScopedRouter.use(attachmentsRouter);
+companyScopedRouter.use(branchesRouter);

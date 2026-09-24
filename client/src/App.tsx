@@ -24,6 +24,7 @@ import StockReportPage from "./pages/StockReportPage";
 import PosPage from "./pages/PosPage";
 import AuditPage from "./pages/AuditPage";
 import StockCountPage from "./pages/StockCountPage";
+import BranchesPage from "./pages/BranchesPage";
 
 export default function App() {
   useEffect(() => { applyTheme(getStoredThemeKey()); }, []);
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="reconciliation" element={<ReconciliationPage />} />
             <Route path="pos" element={<PosPage />} />
             <Route path="audit" element={<AuditPage />} />
+            <Route path="branches" element={<BranchesPage />} />
           </Route>
         </Routes>
       </AuthProvider>
