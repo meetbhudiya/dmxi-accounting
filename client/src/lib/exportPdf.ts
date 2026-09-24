@@ -583,7 +583,8 @@ export function exportTrialBalancePdf(report: TrialBalance, companyName = "DMXI"
 interface QuoteItem { description: string; qty: number; unitPrice: number; }
 interface QuoteForPdf {
   number: string; customer: string; issueDate: string; validUntil: string;
-  status: string; items: QuoteItem[]; notes: string; total: number;
+  status: string; items: QuoteItem[]; notes: string;
+  vatPercent: number; vatAmount: number; subtotal: number; total: number;
 }
 
 export function downloadQuotePdf(quote: QuoteForPdf, companyName = "DMXI") {
@@ -659,7 +660,9 @@ export function downloadQuotePdf(quote: QuoteForPdf, companyName = "DMXI") {
   y += 6;
 
   // Items table
-  const subtotal = quote.items.reduce((s, it) => s + it.qty * it.unitPrice, 0);
+  const subtotal = quote.subtotal > 0
+    ? quote.subtotal
+    : quote.items.reduce((s, it) => s + it.qty * it.unitPrice, 0);
   autoTable(doc, {
     startY: y,
     margin: { left: m, right: m },
@@ -696,6 +699,14 @@ export function downloadQuotePdf(quote: QuoteForPdf, companyName = "DMXI") {
   doc.setTextColor(...DARK);
   doc.text(money(subtotal), rX, ty, { align: "right" });
   ty += 5.5;
+
+  if (quote.vatPercent > 0) {
+    doc.setTextColor(...MUTED);
+    doc.text(`VAT (${quote.vatPercent}%):`, m, ty);
+    doc.setTextColor(...DARK);
+    doc.text(money(quote.vatAmount), rX, ty, { align: "right" });
+    ty += 5.5;
+  }
 
   // Grand Total card
   doc.setDrawColor(...BORDER);

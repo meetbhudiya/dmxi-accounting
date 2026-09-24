@@ -54,6 +54,9 @@ interface Quote {
   status: QuoteStatus;
   items: QuoteItem[];
   notes: string;
+  vatPercent: number;
+  vatAmount: number;
+  subtotal: number;
   total: number;
 }
 
@@ -76,6 +79,9 @@ function mapQuote(raw: any): Quote {
     validUntil: typeof raw.validUntil === "string" ? raw.validUntil.slice(0, 10) : new Date(raw.validUntil).toISOString().slice(0, 10),
     status:     raw.status as QuoteStatus,
     notes:      raw.notes ?? "",
+    vatPercent: Number(raw.vatPercent ?? 0),
+    vatAmount:  Number(raw.vatAmount ?? 0),
+    subtotal:   Number(raw.subtotal ?? 0),
     total:      Number(raw.total),
     items:      (raw.items ?? []).map((it: any) => ({
       description: it.description,
