@@ -310,3 +310,53 @@ tfoot td { border-bottom: none; }
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Tables scroll horizontally instead of breaking layout */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Page header stacks title + actions vertically */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .page-header h1 { font-size: 18px; }
+
+  /* Form rows stack to single column */
+  .form-row {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* KPI grid: 2 columns */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .kpi-card .value { font-size: 20px; }
+
+  /* Modals: full width with safe margins */
+  .modal {
+    max-width: calc(100vw - 24px);
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  /* Modal actions wrap on very small screens */
+  .modal-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Buttons: min touch target height */
+  .btn { min-height: 40px; padding: 8px 14px; }
+
+  /* Cards: tighter padding */
+  .card { padding: 14px; border-radius: 10px; }
+}

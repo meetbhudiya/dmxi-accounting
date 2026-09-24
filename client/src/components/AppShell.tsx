@@ -1,4 +1,4 @@
-import { NavLink, Outlet, Navigate, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { getFeatures, onFeaturesChanged } from "../lib/features";
@@ -116,6 +116,25 @@ export default function AppShell() {
   const [features, setFeatures] = useState(getFeatures);
   const updateAvailable = useVersionCheck();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handler = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) setSidebarOpen(false);
+    };
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
+  // Close drawer on navigation
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false);
+  }, [location.pathname]);
 
   // ── Shortcut state ──────────────────────────────────────────────────────────
   const [showHelp, setShowHelp] = useState(false);
@@ -207,6 +226,49 @@ export default function AppShell() {
         {updateAvailable && <UpdateOverlay />}
         <ShortcutsHelp open={showHelp} onClose={() => setShowHelp(false)} />
 
+        {/* ── Mobile top header ─────────────────────────────────────────────── */}
+        {isMobile && (
+          <header style={{
+            position: "fixed", top: 0, left: 0, right: 0, height: 56,
+            background: "#0d1117", borderBottom: "1px solid rgba(255,255,255,0.07)",
+            display: "flex", alignItems: "center", padding: "0 14px", gap: 12,
+            zIndex: 1100,
+          }}>
+            <button
+              onClick={() => setSidebarOpen((o) => !o)}
+              style={{ background: "none", border: "none", padding: 6, borderRadius: 7, color: "#c9d4e0", cursor: "pointer", display: "flex", alignItems: "center" }}
+              aria-label="Open menu"
+            >
+              <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
+              <div style={{
+                width: 28, height: 28,
+                background: "linear-gradient(135deg, #2454ff 0%, #0f2b99 100%)",
+                borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 13, fontWeight: 800, color: "#fff",
+              }}>D</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#fff", letterSpacing: "-0.3px" }}>DMXI</div>
+            </div>
+            <div style={{
+              width: 32, height: 32,
+              background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+              borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 12, fontWeight: 700, color: "#fff", flexShrink: 0,
+            }}>{initials}</div>
+          </header>
+        )}
+
+        {/* ── Sidebar backdrop (mobile) ─────────────────────────────────────── */}
+        {isMobile && sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1150 }}
+          />
+        )}
+
         {/* ── Sidebar ───────────────────────────────────────────────────────── */}
         <aside style={{
           width: 232,
@@ -216,10 +278,14 @@ export default function AppShell() {
           flexDirection: "column",
           flexShrink: 0,
           borderRight: "1px solid rgba(255,255,255,0.06)",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          overflowY: "auto",
+          ...(isMobile ? {
+            position: "fixed", top: 0, left: 0, bottom: 0, height: "100vh",
+            zIndex: 1200, overflowY: "auto",
+            transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
+            transition: "transform 0.25s cubic-bezier(0.4,0,0.2,1)",
+          } : {
+            position: "sticky", top: 0, height: "100vh", overflowY: "auto",
+          }),
         }}>
 
           {/* Logo */}
@@ -391,9 +457,9 @@ export default function AppShell() {
         </aside>
 
         {/* ── Main content ──────────────────────────────────────────────────── */}
-        <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", minHeight: "100vh", ...(isMobile ? { paddingTop: 56 } : {}) }}>
           <UpdateBanner />
-          <div style={{ flex: 1, padding: "28px 32px", overflow: "auto" }}>
+          <div style={{ flex: 1, padding: isMobile ? "20px 16px" : "28px 32px", overflow: "auto" }}>
           {currentCompany ? <Outlet /> : (
             <div className="card" style={{ maxWidth: 400 }}>
               <h2 style={{ marginTop: 0, fontSize: 16 }}>No company yet</h2>
